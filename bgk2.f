@@ -27,7 +27,7 @@ c     0 - dim diagnostic
             call diag0D(istep)
          endif
 c     movie
-         if(mod(istep, 500) .eq. 0) then
+         if(mod(istep, 100) .eq. 0) then
             call movie(istep)
          endif
 c     2d configs
@@ -236,7 +236,7 @@ c     equils are written explicitly to avoid multplications by zero
 
       return
       end
-      
+
       subroutine Force(it, frce)
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
@@ -352,11 +352,19 @@ c     bot
 c----------------------------------------------------------
       character raw*(2 + 8 + 4)
       character xdmf*(2 + 8 + 6)
+      parameter(nf = 4)
+      character fields(nf)*4
+      data fields /'u', 'v', 'rho', 'vort'/
+      intrinsic trim
+
       write(raw, '(A, I8.8, A)') 'p.', it, '.raw'
       open(77, file = raw, status = 'REPLACE', form = 'UNFORMATTED',
      $     err = 101, access = 'DIRECT',
-     $     recl = nx * ny * 3 * 8)
-      write(77, rec = 1) u(1:nx, 1:ny), v(1:nx, 1:ny), rho(1:nx, 1:ny)
+     $     recl = nf * 8 * nx * ny)
+      write(77, rec = 1) u(1:nx, 1:ny), v(1:nx, 1:ny),
+     $     rho(1:nx, 1:ny),
+     $     ((u(i, j + 1) - u(i, j - 1) - v(i + 1, j) + v(i - 1, j),
+     $     i = 1, nx), j = 1, ny)
       close(77)
 
       write(xdmf, '(A, I8.8, A)') 'p.', it, '.xdmf2'
@@ -381,43 +389,21 @@ c----------------------------------------------------------
       write(77, '(A)') '	  1'
       write(77, '(A)') '	</DataItem>'
       write(77, '(A)') '      </Geometry>'
-      write(77, '(A)') '      <Attribute'
-      write(77, '(A)') '	  Center="Cell"'
-      write(77, '(A)') '	  Name="u">'
-      write(77, '(A)') '	<DataItem'
-      write(77, '(A)') '            Format="Binary"'
-      write(77, '(A)') '            Precision="8"'
-      write(77, '(    ''            Dimensions="'', I8, I8, ''">'')')
-     $     ny, nx
-      write(77, '(    ''          '', A)') raw
-      write(77, '(A)') '	</DataItem>'
-      write(77, '(A)') '      </Attribute>	'
-      write(77, '(A)') '      <Attribute'
-      write(77, '(A)') '	  Center="Cell"'
-      write(77, '(A)') '	  Name="v">'
-      write(77, '(A)') '	<DataItem'
-      write(77, '(A)') '            Format="Binary"'
-      write(77, '(A)') '            Precision="8"'
-      write(77, '(    ''            Seek="'', I8, ''"'')')
-     $     8 * ny * nx
-      write(77, '(    ''            Dimensions="'', I8, I8, ''">'')')
-     $     ny, nx
-      write(77, '(    ''          '', A)') raw
-      write(77, '(A)') '	</DataItem>'
-      write(77, '(A)') '      </Attribute>	'
-      write(77, '(A)') '      <Attribute'
-      write(77, '(A)') '	  Center="Cell"'
-      write(77, '(A)') '	  Name="rho">'
-      write(77, '(A)') '	<DataItem'
-      write(77, '(A)') '            Format="Binary"'
-      write(77, '(A)') '            Precision="8"'
-      write(77, '(    ''            Seek="'', I8, ''"'')')
-     $     2 * 8 * ny * nx
-      write(77, '(    ''            Dimensions="'', I8, I8, ''">'')')
-     $     ny, nx
-      write(77, '(    ''          '', A)') raw
-      write(77, '(A)') '	</DataItem>'
-      write(77, '(A)') '      </Attribute>	'
+      do 100 i = 1, nf
+         write(77, '(A)') '      <Attribute'
+         write(77, '(A)') '	  Center="Cell"'
+         write(77, '(    ''       Name="'', A, ''">'')') trim(fields(i))
+         write(77, '(A)') '	<DataItem'
+         write(77, '(A)') '            Format="Binary"'
+         write(77, '(A)') '            Precision="8"'
+         write(77, '(    ''            Seek="'', I8, ''"'')')
+     $        (i - 1) * 8 * ny * nx
+         write(77, '(    ''            Dimensions="'', I8, I8, ''">'')')
+     $        ny, nx
+         write(77, '(    ''          '', A)') raw
+         write(77, '(A)') '	</DataItem>'
+         write(77, '(A)') '      </Attribute>	'
+ 100  continue
       write(77, '(A)') '    </Grid>'
       write(77, '(A)') '  </Domain>'
       write(77, '(A)') '</Xdmf>'

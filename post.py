@@ -5,11 +5,13 @@ import sys
 import numpy as np
 
 def update(path):
-    u = np.memmap(path, dtype=np.float64, shape=(nx, ny), order='C')
-    plt.imshow(u,  matplotlib.cm.jet)
+    dtype = np.float64
+    u, v, rho, vort = np.memmap(path, dtype=dtype, shape=(4, nx, ny))
+    plt.imshow(u, matplotlib.cm.jet)
+    plt.tight_layout()
 
 nx, ny = 64, 128
 plt.axis("off")
-plt.tight_layout()
+plt.axis("equal")
 ani = matplotlib.animation.FuncAnimation(fig=plt.gcf(), func=update, frames=sys.argv[1:])
-ani.save("u.gif")
+ani.save("u.mp4")

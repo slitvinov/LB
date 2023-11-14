@@ -31,4 +31,4 @@ To postprocess
 $ python post.py  *.raw
 </pre>
 
-<p align="center"><img src="img/u.gif"/></p>
+<p align="center"><video src="img/u.mp4" width=180/></p>
