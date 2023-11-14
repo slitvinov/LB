@@ -1,0 +1,6 @@
+css Lattice BGK simpl estart-up code in D=2 along with the book: The
+css Lattice Boltzmann equation for fluid dynamics and beyond: Oxford
+css Univ. Press, 2001 Slightly readapted for the 2018 version of the
+css book Author: Sauro Succi Disclaimer: The code is a simple warm-up,
+css bug-freedom not guaranteed The author declines any responsibility
+css for any incorrect result obtained via this code.

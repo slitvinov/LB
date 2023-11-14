@@ -1,54 +1,22 @@
-css
-css
-css
-css
-css
-css Lattice BGK simpl estart-up code in D=2
-css along with the book:
-css The Lattice Boltzmann equation
-css for fluid dynamics and beyond: Oxford Univ. Press, 2001
-css Slightly readapted for the 2018 version of the book
-css Author: Sauro Succi
-css Disclaimer:
-css The code is a simple warm-up, bug-freedom not guaranteed
-css The author declines any responsibility
-css for any incorrect result obtained via this code.
-
-c
 c     D2Q9 lattice, BGK version
 c     0= rest particles, 1-4, nearest-neigh(nn), 5-8(nnn)
-c     ================================
       program bgk2d
-c     ================================
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
-c     ------------------------------------------------------------
-c     --- input parameters
-
       call input
-
-c     --- initialisation
-
       call inithydro
       call equil
       call initpop
-
-c     ------- MAIN LOOP
       iconf=0
       do 10 istep = 1,nsteps
 c     periodic boundary conditions
 css   call pbc
 c     mixed boundary conditions c(Poiseuille flow)
          call mbc
-
          call move
-
          call hydrovar
-
          call equil
-
          call colli
-
          if(iforce) then
             call force(istep, frce)
          endif
@@ -58,7 +26,7 @@ c     0 - dim diagnostic
          if(mod(istep,ndiag) .eq. 0) then
             call diag0D(istep)
          endif
-c     1d movie for gnuplot
+c     movie
          if(mod(istep, 500) .eq. 0) then
             call movie(istep)
          endif
@@ -71,16 +39,12 @@ c     2d configs
             call config(istep, iconf)
             iconf=iconf+1
          endif
-c     --------- end of main loop
-
  10   continue
       end
-c     =========================
+
       subroutine Input
-c     =========================
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
-c---------------------------------------------------
       print *, 'Number of steps'
       read(5 ,*) nsteps
       print *, 'Number of steps between printing profile'
@@ -139,20 +103,16 @@ c     viscosity and nominal Reynolds
       if(visc .lt. 0) stop 'OMEGA OUT of(0, 2) interval!!'
 
 c     Applied force(based on Stokes problem)
-
       fpois = 8.0d0 * visc * uf / dfloat(ny) / dfloat(ny)
 c     # of biased populations
       fpois = rho0 * fpois / 6.
       print *, 'Intensity of the applied force', fpois
-
       return
       end
-c     ==============================
+
       subroutine Inithydro
-c     ==============================
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
-c     ---------------------------------------------------
       write(6, *) 'u0', u0
       do j = 0, ny+1
          do i = 0, nx+1
@@ -163,12 +123,10 @@ c     ---------------------------------------------------
       enddo
       return
       end
-c     ============================
+
       subroutine Initpop
-c     ============================
       implicit double precision(a- h, o-z)
       include 'bgk2.par'
-c---------------------------------------------------
       iseed = 15391
 c     random amplitude
       ramp = 0.01
@@ -182,15 +140,12 @@ c     random amplitude
             end do
          end do
       end do
-
       return
       end
-c     ========================
+
       subroutine Move
-c     ========================
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
-c     ---------------------------------------------
       do j = ny, 1, -1
          do i = 1, nx
             f(2, i, j) = f(2, i, j - 1)
@@ -217,12 +172,10 @@ c     ---------------------------------------------
       enddo
       return
       end
-c     =========================
+
       subroutine Hydrovar
-c     =========================
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
-c     --------------------------------------------
 c     hydro variables
       do j = 1, ny
          do i = 1, nx
@@ -239,13 +192,11 @@ c     hydro variables
 
       return
       end
-c     ========================
+
       subroutine Equil
-c     ========================
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
-c-------------------------------------------------
-c     equils are written explicitly t o avoid multplications by zero
+c     equils are written explicitly to avoid multplications by zero
       do j = 0, ny+1
          do i = 0, nx+1
             rl = rho(i,j)
@@ -274,12 +225,10 @@ c     equils are written explicitly t o avoid multplications by zero
 
       return
       end
-c     =========================
+
       subroutine Colli
-c     =========================
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
-c----------------------------------------------------------
       do k = 0, npop - 1
          do j = 1, ny
             do i = 1, nx
@@ -291,12 +240,10 @@ c----------------------------------------------------------
 
       return
       end
-c     ===================================
+      
       subroutine Force(it, frce)
-c     ===================================
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
-c     --------------------------------------------------------
       frce = fpois
       do j = 1, ny
          do i = 1, nx
@@ -312,12 +259,10 @@ c     --------------------------------------------------------
 
       return
       end
-c     =========================
+
       subroutine Pbc
-c     =========================
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
-c-----------------------------------------------------------
 c     EAST
       do j = 1, ny
          f(1, 0, j) = f(1, nx, j)
@@ -345,12 +290,9 @@ c     SOUTH
 
       return
       end
-c     ========================
       subroutine Mbc
-c     ========================
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
-c-------------------------------------------------------------
 c     WEST inlet
       do j = 1, ny
          f(1, 0, j) = f(1, nx, j)
@@ -383,12 +325,10 @@ c     corners bounce-back
 
       return
       end
-c     ==========================
+
       subroutine Obst
-c     ==========================
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
-c--------------------------------------------------------
       i         = nx / 4
       jbot = ny / 2 - nobst / 2
       jtop = ny / 2 + nobst / 2 + 1
@@ -409,9 +349,8 @@ c     bot
 
       return
       end
-c     ===============================
+
       subroutine Movie(it)
-c     ===============================
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
 c----------------------------------------------------------
@@ -487,17 +426,14 @@ c----------------------------------------------------------
       write(77, '(A)') '  </Domain>'
       write(77, '(A)') '</Xdmf>'
       close(77)
-
       return
  101  write (*, '(''bgk2: error: fail to write output'')')
       stop 1
       end
-c     ===================================
+
       subroutine Profil(it, frce)
-c     ===================================
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
-c----------------------------------------------------------
       write( 6, *) 'ucenter, force ', u(nx / 2, ny / 2), frce
       do j = 1, ny
          write(10, *) j, u(nx / 4, j), u(nx / 2, j), u(3* nx / 4, j)
@@ -508,22 +444,18 @@ c----------------------------------------------------------
       write(10, '(bn)')
       write(11, '(bn)')
       write(12, '(bn)')
-
       do i = 1, nx
          write( 14, *) i, u(i, ny / 2), v(i, ny / 2)
          write( 16, *) i, f(1, i, ny / 2), f(3, i, ny / 2)
       enddo
       write( 14, '(bn)')
-
       write( 50, *) it, u(nx / 2, ny / 2)
       return
       end
-c     ================================
+
       subroutine Diag0D(istep)
-c     ================================
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
-c----------------------------------------------------------
       densit= 0.0d0
       do k = 0, npop - 1
          do j = 1, ny
@@ -550,12 +482,10 @@ c----------------------------------------------------------
      $     istep, densit, umoy, vmoy
       return
       end
-c     ======================================
+
       subroutine Config(istep, iconf)
-c     ======================================
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
-c     -------------------------------------------
       iout = 60 + iconf
       do j = 2, ny - 1
          do i = 2, nx - 1
@@ -568,6 +498,3 @@ c     -------------------------------------------
       write(6, *) 'configuration at time and file >>', istep, iout
       return
       end
-c     *************************************************
-c     the bgk2.f codlet ends here
-c     *************************************************
