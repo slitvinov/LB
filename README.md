@@ -1,13 +1,13 @@
 <h2>Lattice Boltzmann methods</h2>
 
 To build
-<par>
+<pre>
 $ make
 gfortran -O2 -g bgk2.f -o bgk2
-</par>
+</pre>
 
 To run
-<par>
+<pre>
 $ ./bgk2 < bgk2.inp
  Number of steps
  Number of steps between printing profile
@@ -24,11 +24,11 @@ $ ./bgk2 < bgk2.inp
  *****************************************
  Lattice BGK model, 2D with 9 velocities
 ...
-</par>
+</pre>
 
 To postprocess
-<par>
+<pre>
 $ python post.py  *.raw
-</par>
+</pre>
 
 <p align="center"><img src="img/u.gif"/></p>
