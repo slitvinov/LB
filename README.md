@@ -26,3 +26,9 @@ $ ./bgk2 < bgk2.inp
 ...
 </par>
 
+To postprocess
+<par>
+$ python post.py  *.raw
+</par>
+
+<p align="center"><img src="img/u.gif"/></p>
