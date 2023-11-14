@@ -1,0 +1,18 @@
+c     =================================================
+c     parameter file : bgk2.par
+c     =================================================
+      parameter(nx =128, ny = 64, npop = 9)
+      character*5 fileout
+      logical iforce
+
+      common /constants/ cs2, cs22, cssq, omega, fpois, den, visc ,
+     $     w0, w1, w2
+      common /phys/ rho0, u0, v0, uf, fom
+      common /arrays/ iflag(nx, ny) ,
+     $     u(0 : nx + 1, 0 : ny +1), v(0 : nx + 1, 0 : ny +1) ,
+     $     rho(0 : nx + 1, 0 : ny +1) ,
+     $     feq(0 : npop - 1, 0 : nx + 1, 0 : ny +1) ,
+     $     f(0 : npop - 1, 0 : nx + 1, 0 : ny+1)
+      common /count/ iobst, nout, ndiag, nsteps, nobst
+      common /ile/   fileout
+      common /logic/ iforce

@@ -1,0 +1,10 @@
+50001                 n. of steps
+2000                  n. of profiles
+2000                  n. of global diagnos
+1.5                   omega
+T                     force yes / no
+1.0 0.10 0.0          rho, u, v at t=0
+0.10                  u forcing
+1                     obstacle 0 = free, 1 = plate
+8                     obstacle height
+OUP18                 label
