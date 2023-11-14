@@ -60,7 +60,7 @@ c     0 - dim diagnostic
          endif
 c     1d movie for gnuplot
          if(mod(istep, 500) .eq. 0) then
-            call movie
+            call movie(istep)
          endif
 c     1d profiles
          if(mod(istep, nout) .eq. 0) then
@@ -410,19 +410,87 @@ c     bot
       return
       end
 c     ===============================
-      subroutine Movie
+      subroutine Movie(it)
 c     ===============================
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
 c----------------------------------------------------------
-      open(99, file = 'movie.out')
-      do j = 1, ny
-         write(99, *) j, u(nx / 4, j), u(nx / 2, j), u(3 * nx / 4, j)
-      enddo
-      write(99, '(bn)')
-      write(99, '(bn)')
+      character raw*(2 + 8 + 4)
+      character xdmf*(2 + 8 + 6)
+      write(raw, '(A, I8.8, A)') 'p.', it, '.raw'
+      open(77, file = raw, status = 'REPLACE', form = 'UNFORMATTED',
+     $     err = 101, access = 'DIRECT',
+     $     recl = nx * ny * 3 * 8)
+      write(77, rec = 1) u(1:nx, 1:ny), v(1:nx, 1:ny), rho(1:nx, 1:ny)
+      close(77)
+
+      write(xdmf, '(A, I8.8, A)') 'p.', it, '.xdmf2'
+      open (77, file=xdmf, status='REPLACE')
+      write(77, '(A)') '<Xdmf>'
+      write(77, '(A)') '  <Domain>'
+      write(77, '(A)') '    <Grid>'
+      write(77, '(A)') '      <Topology'
+      write(77, '(A)') '	  TopologyType="2DCoRectMesh"'
+      write(77, '(    ''          Dimensions="'', I8, I8, ''"/>'')')
+     $     ny + 1, nx + 1
+      write(77, '(A)') '      <Geometry'
+      write(77, '(A)') '	  GeometryType="ORIGIN_DXDY">'
+      write(77, '(A)') '	<DataItem'
+      write(77, '(A)') '	    Dimensions="2">'
+      write(77, '(A)') '	  0'
+      write(77, '(A)') '	  0'
+      write(77, '(A)') '	</DataItem>'
+      write(77, '(A)') '	<DataItem'
+      write(77, '(A)') '	    Dimensions="2">'
+      write(77, '(A)') '	  1'
+      write(77, '(A)') '	  1'
+      write(77, '(A)') '	</DataItem>'
+      write(77, '(A)') '      </Geometry>'
+      write(77, '(A)') '      <Attribute'
+      write(77, '(A)') '	  Center="Cell"'
+      write(77, '(A)') '	  Name="u">'
+      write(77, '(A)') '	<DataItem'
+      write(77, '(A)') '            Format="Binary"'
+      write(77, '(A)') '            Precision="8"'
+      write(77, '(    ''            Dimensions="'', I8, I8, ''">'')')
+     $     ny, nx
+      write(77, '(    ''          '', A)') raw
+      write(77, '(A)') '	</DataItem>'
+      write(77, '(A)') '      </Attribute>	'
+      write(77, '(A)') '      <Attribute'
+      write(77, '(A)') '	  Center="Cell"'
+      write(77, '(A)') '	  Name="v">'
+      write(77, '(A)') '	<DataItem'
+      write(77, '(A)') '            Format="Binary"'
+      write(77, '(A)') '            Precision="8"'
+      write(77, '(    ''            Seek="'', I8, ''"'')')
+     $     8 * ny * nx
+      write(77, '(    ''            Dimensions="'', I8, I8, ''">'')')
+     $     ny, nx
+      write(77, '(    ''          '', A)') raw
+      write(77, '(A)') '	</DataItem>'
+      write(77, '(A)') '      </Attribute>	'
+      write(77, '(A)') '      <Attribute'
+      write(77, '(A)') '	  Center="Cell"'
+      write(77, '(A)') '	  Name="rho">'
+      write(77, '(A)') '	<DataItem'
+      write(77, '(A)') '            Format="Binary"'
+      write(77, '(A)') '            Precision="8"'
+      write(77, '(    ''            Seek="'', I8, ''"'')')
+     $     2 * 8 * ny * nx
+      write(77, '(    ''            Dimensions="'', I8, I8, ''">'')')
+     $     ny, nx
+      write(77, '(    ''          '', A)') raw
+      write(77, '(A)') '	</DataItem>'
+      write(77, '(A)') '      </Attribute>	'
+      write(77, '(A)') '    </Grid>'
+      write(77, '(A)') '  </Domain>'
+      write(77, '(A)') '</Xdmf>'
+      close(77)
 
       return
+ 101  write (*, '(''bgk2: error: fail to write output'')')
+      stop 1
       end
 c     ===================================
       subroutine Profil(it, frce)
