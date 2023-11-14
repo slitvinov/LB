@@ -30,10 +30,6 @@ c     movie
          if(mod(istep, 500) .eq. 0) then
             call movie(istep)
          endif
-c     1d profiles
-         if(mod(istep, nout) .eq. 0) then
-            call profil(istep, frce)
-         endif
 c     2d configs
          if(mod(istep, nout) .eq. 0) then
             call config(istep, iconf)
@@ -429,28 +425,6 @@ c----------------------------------------------------------
       return
  101  write (*, '(''bgk2: error: fail to write output'')')
       stop 1
-      end
-
-      subroutine Profil(it, frce)
-      implicit double precision(a-h, o-z)
-      include 'bgk2.par'
-      write( 6, *) 'ucenter, force ', u(nx / 2, ny / 2), frce
-      do j = 1, ny
-         write(10, *) j, u(nx / 4, j), u(nx / 2, j), u(3* nx / 4, j)
-         write(11, *) j, v(nx / 4, j), v(nx / 2, j), v(3* nx / 4, j)
-         write(12, *) j, rho(nx / 2, j)
-         write(99, *) j, u(nx / 2, j)
-      enddo
-      write(10, '(bn)')
-      write(11, '(bn)')
-      write(12, '(bn)')
-      do i = 1, nx
-         write( 14, *) i, u(i, ny / 2), v(i, ny / 2)
-         write( 16, *) i, f(1, i, ny / 2), f(3, i, ny / 2)
-      enddo
-      write( 14, '(bn)')
-      write( 50, *) it, u(nx / 2, ny / 2)
-      return
       end
 
       subroutine Diag0D(istep)
