@@ -110,27 +110,21 @@ for istep in range(1, nsteps + 1):
             f[7, i, j] = f[7, i + 1, j + 1]
 
     # hydrovar
-    for j in range(1, ny + 1):
-        for i in range(1, nx + 1):
-            rho[i, j] = f[1, i, j] + f[2, i, j] + f[3, i, j] + f[4, i, j] + f[
-                5, i, j] + f[6, i, j] + f[7, i, j] + f[8, i, j] + f[0, i, j]
-            rhoi = 1. / rho[i, j]
-            u[i, j] = (f[1, i, j] - f[3, i, j] + f[5, i, j] - f[6, i, j] -
-                       f[7, i, j] + f[8, i, j]) * rhoi
-            v[i, j] = (f[5, i, j] + f[2, i, j] + f[6, i, j] - f[7, i, j] -
-                       f[4, i, j] - f[8, i, j]) * rhoi
+    rho = f[1] + f[2] + f[3] + f[4] + f[5] + f[6] + f[7] + f[8] + f[0]
+    u = (f[1] - f[3] + f[5] - f[6] - f[7] + f[8]) / rho
+    v = (f[5] + f[2] + f[6] - f[7] - f[4] - f[8]) / rho
     equil()
     # collision step
     f = f * (1.0 - omega) + omega * feq
 
     if iforce:
-        f[1, ::] += fpois
-        f[5, ::] += fpois
-        f[8, ::] += fpois
+        f[1] += fpois
+        f[5] += fpois
+        f[8] += fpois
 
-        f[3, ::] -= fpois
-        f[6, ::] -= fpois
-        f[7, ::] -= fpois
+        f[3] -= fpois
+        f[6] -= fpois
+        f[7] -= fpois
 
     if iobst:
         i = nx // 4
@@ -156,4 +150,4 @@ for istep in range(1, nsteps + 1):
             vort = np.roll(u, [0, 1]) - np.roll(u, [0, -1]) - np.roll(
                 v, [1, 0]) + np.roll(v, [-1, 0])
             file.write(vort[1:nx + 1, 1:ny + 1].tobytes("F"))
-print(np.var(u), np.var(v), np.var(rho))
+print(np.var(u[1:nx + 1, 1:ny + 1]), np.var(v[1:nx + 1, 1:ny + 1]), np.var(rho[1:nx + 1, 1:ny + 1]))
