@@ -32,9 +32,7 @@ def equil():
 nx = 128
 ny = 64
 npop = 9
-nsteps = 10001
-nout = 2000
-ndiag = 2000
+nsteps = 1001
 omega = 1.5
 iforce = True
 rho0 = 1
@@ -70,20 +68,16 @@ feq = np.empty((npop, nx + 2, ny + 2))
 f = np.empty((npop, nx + 2, ny + 2))
 
 # init hydro
-rho[...] = rho0
-u[...] = u0
-v[...] = v0
+rho[:] = rho0
+u[:] = u0
+v[:] = v0
 
 equil()
 
 # init pop
-ramp = 0.01
-random.seed(1234)
-for j in range(ny + 2):
-    for i in range(nx + 2):
-        for ip in range(npop):
-            rr = random.uniform(-1, 1)
-            f[ip, i, j] = (1 + ramp * rr) * rho0 / npop
+# The discrete populations are initialized with the
+# equilibroum values
+f[:] = feq
 
 for istep in range(1, nsteps + 1):
     # mbc
@@ -131,15 +125,13 @@ for istep in range(1, nsteps + 1):
     # hydrovar
     for j in range(1, ny + 1):
         for i in range(1, nx + 1):
-            rho[i,j]= f[1, i, j] + f[2, i, j] + f[3, i, j] \
-                + f[4, i, j] + f[5, i, j] + f[6, i, j] \
-                + f[7, i, j] + f[8, i, j] + f[0, i, j]
+            rho[i, j] = f[1, i, j] + f[2, i, j] + f[3, i, j] + f[4, i, j] + f[
+                5, i, j] + f[6, i, j] + f[7, i, j] + f[8, i, j] + f[0, i, j]
             rhoi = 1. / rho[i, j]
-            u[i, j] =(f[1, i, j] - f[3, i, j] + f[5, i, j] - \
-                f[6, i, j] - f[7, i, j] + f[8, i, j])* rhoi
-            v[i, j] =(f[5, i, j] + f[2, i, j]+ f[6, i, j] \
-                - f[7, i, j] - f[4, i, j] - f[8, i, j]) * rhoi
-
+            u[i, j] = (f[1, i, j] - f[3, i, j] + f[5, i, j] - f[6, i, j] -
+                       f[7, i, j] + f[8, i, j]) * rhoi
+            v[i, j] = (f[5, i, j] + f[2, i, j] + f[6, i, j] - f[7, i, j] -
+                       f[4, i, j] - f[8, i, j]) * rhoi
     equil()
     # colli
     for k in range(npop):
@@ -150,13 +142,13 @@ for istep in range(1, nsteps + 1):
         frce = fpois
         for j in range(1, ny + 1):
             for i in range(1, nx + 1):
-                f[1, i, j] = f[1, i, j] + frce
-                f[5, i, j] = f[5, i, j] + frce
-                f[8, i, j] = f[8, i, j] + frce
+                f[1, i, j] += frce
+                f[5, i, j] += frce
+                f[8, i, j] += frce
 
-                f[3, i, j] = f[3, i, j] - frce
-                f[6, i, j] = f[6, i, j] - frce
-                f[7, i, j] = f[7, i, j] - frce
+                f[3, i, j] -= frce
+                f[6, i, j] -= frce
+                f[7, i, j] -= frce
     if iobst:
         i = nx // 4
         jbot = ny // 2 - nobst // 2

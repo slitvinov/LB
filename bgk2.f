@@ -312,10 +312,10 @@ c     SOUTH solid
          f(5, i, 0) = f(7, i +1 ,1)
       enddo
 c     corners bounce-back
-      f(8, 0, ny+1)         = f(6, 1, ny)
-      f(5 ,0 ,0)               = f(7 ,1 ,1)
-      f(7, nx +1, ny+1) = f(5, nx, ny)
-      f(6, nx +1 ,0)         = f(8, nx, 1)
+      f(8, 0, ny + 1) = f(6, 1, ny)
+      f(5, 0, 0) = f(7, 1, 1)
+      f(7, nx + 1, ny + 1) = f(5, nx, ny)
+      f(6, nx + 1, 0) = f(8, nx, 1)
 
       return
       end
