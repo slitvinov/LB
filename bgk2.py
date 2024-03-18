@@ -1,8 +1,6 @@
 import numpy as np
-
+# import torch as np
 # 0 = rest particles, 1-4 = velocity 1, 4-9 = velocity sqrt(2)
-
-
 def equil():
     ul = u / cs2
     vl = v / cs2
@@ -55,12 +53,12 @@ print(rey)
 fpois = 8.0 * visc * uf / ny / ny
 fpois = rho0 * fpois / 6.
 
-u = np.full((nx + 2, ny + 2), u0, np.float64)
-v = np.full((nx + 2, ny + 2), v0, np.float64)
-rho = np.full((nx + 2, ny + 2), rho0, np.float64)
-feq = np.empty((9, nx + 2, ny + 2), np.float64)
+u = np.full((nx + 2, ny + 2), u0, dtype=np.float64)
+v = np.full((nx + 2, ny + 2), v0, dtype=np.float64)
+rho = np.full((nx + 2, ny + 2), rho0, dtype=np.float64)
+feq = np.empty((9, nx + 2, ny + 2), dtype=np.float64)
 equil()
-f = np.copy(feq)
+f = feq[:]
 for istep in range(1, nsteps + 1):
     # inlet
     f[1, 0, 1:ny + 1] = f[1, nx, 1:ny + 1]
@@ -133,9 +131,11 @@ for istep in range(1, nsteps + 1):
     if istep % 100 == 0:
         path = "bgk.%08d.raw" % istep
         with open(path, "wb") as file:
-            vort = np.roll(u, [0, 1]) - np.roll(u, [0, -1]) - np.roll(
-                v, [1, 0]) + np.roll(v, [-1, 0])
+            vort = np.roll(u, [0, 1], [0, 1]) - np.roll(u, [0, -1], [0, 1]) - np.roll(
+                v, [1, 0], [0, 1]) + np.roll(v, [-1, 0], [0, 1])
             for field in u, v, rho, vort:
+                if hasattr(field, "numpy"):
+                    field = field.numpy()
                 file.write(field[1:nx + 1, 1:ny + 1].tobytes("F"))
         print(np.var(u[1:nx + 1, 1:ny + 1]), np.var(v[1:nx + 1, 1:ny + 1]),
               np.var(rho[1:nx + 1, 1:ny + 1]))
