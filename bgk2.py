@@ -1,7 +1,7 @@
 import numpy as np
 
+# 0 = rest particles, 1-4 = velocity 1, 4-9 = velocity sqrt(2)
 
-# equil
 def equil():
     for j in range(ny + 2):
         for i in range(nx + 2):
@@ -31,7 +31,7 @@ def equil():
 nx = 128
 ny = 64
 npop = 9
-nsteps = 1001
+nsteps = 101
 omega = 1.5
 iforce = True
 rho0 = 1
@@ -41,12 +41,12 @@ uf = 0.1
 iobst = True
 nobst = 8
 
-#     lattice weights
-w0 = 4.00 / 9.00
-w1 = 1.0 / 9.00
-w2 = 1.0 / 36.00
+# lattice weights
+w0 = 4.0 / 9.0
+w1 = 1.0 / 9.0
+w2 = 1.0 / 36.0
 
-#     sound - speed and related constants
+# sound - speed and related constants
 cs2 = 1.0 / 3.0
 cs22 = 2.0 * cs2
 cssq = 2.0 / 9.0
@@ -54,48 +54,40 @@ cssq = 2.0 / 9.0
 visc = (1.0 / omega - 0.5) * cs2
 rey = u0 * ny / visc
 
-#     Applied force(based on Stokes problem)
-fpois = 8.0 * visc * uf / float(ny) / float(ny)
-
-#     # of biased populations
+# applied force (based on Stokes problem)
+fpois = 8.0 * visc * uf / ny / ny
 fpois = rho0 * fpois / 6.
 
-u = np.empty((nx + 2, ny + 2))
-v = np.empty((nx + 2, ny + 2))
-rho = np.empty((nx + 2, ny + 2))
-feq = np.empty((npop, nx + 2, ny + 2))
-f = np.empty((npop, nx + 2, ny + 2))
-
-# init hydro
-rho[:] = rho0
-u[:] = u0
-v[:] = v0
-
+u = np.full((nx + 2, ny + 2), u0, np.float64)
+v = np.full((nx + 2, ny + 2), v0, np.float64)
+rho = np.full((nx + 2, ny + 2), rho0, np.float64)
+feq = np.empty((npop, nx + 2, ny + 2), np.float64)
 equil()
-
-# init pop
-# The discrete populations are initialized with the
-# equilibroum values
-f[:] = feq
-
+f = np.copy(feq)
 for istep in range(1, nsteps + 1):
-    # mbc
-    for j in range(1, ny + 1):
-        f[1, 0, j] = f[1, nx, j]
-        f[5, 0, j] = f[5, nx, j]
-        f[8, 0, j] = f[8, nx, j]
-    for j in range(1, ny + 1):
-        f[3, nx + 1, j] = f[3, 1, j]
-        f[6, nx + 1, j] = f[6, 1, j]
-        f[7, nx + 1, j] = f[7, 1, j]
+    # inlet
+    f[1, 0, :] = f[1, nx, :]
+    f[5, 0, :] = f[5, nx, :]
+    f[8, 0, :] = f[8, nx, :]
+
+    # outlet
+    f[3, nx + 1, :] = f[3, 1, :]
+    f[6, nx + 1, :] = f[6, 1, :]
+    f[7, nx + 1, :] = f[7, 1, :]
+
+    # bounce back (north)
     for i in range(1, nx + 1):
         f[4, i, ny + 1] = f[2, i, ny]
         f[8, i, ny + 1] = f[6, i + 1, ny]
         f[7, i, ny + 1] = f[5, i - 1, ny]
+
+    # bounce back (source)
     for i in range(1, nx + 1):
         f[2, i, 0] = f[4, i, 1]
         f[6, i, 0] = f[8, i - 1, 1]
         f[5, i, 0] = f[7, i + 1, 1]
+
+    # corners
     f[8, 0, ny + 1] = f[6, 1, ny]
     f[5, 0, 0] = f[7, 1, 1]
     f[7, nx + 1, ny + 1] = f[5, nx, ny]
@@ -132,22 +124,18 @@ for istep in range(1, nsteps + 1):
             v[i, j] = (f[5, i, j] + f[2, i, j] + f[6, i, j] - f[7, i, j] -
                        f[4, i, j] - f[8, i, j]) * rhoi
     equil()
-    # colli
-    for k in range(npop):
-        for j in range(1, ny + 1):
-            for i in range(1, nx + 1):
-                f[k, i, j] = f[k, i, j] * (1.0 - omega) + omega * feq[k, i, j]
+    # collision step
+    f = f * (1.0 - omega) + omega * feq
+    
     if iforce:
-        frce = fpois
-        for j in range(1, ny + 1):
-            for i in range(1, nx + 1):
-                f[1, i, j] += frce
-                f[5, i, j] += frce
-                f[8, i, j] += frce
-
-                f[3, i, j] -= frce
-                f[6, i, j] -= frce
-                f[7, i, j] -= frce
+        f[1, ::] += fpois
+        f[5, ::] += fpois
+        f[8, ::] += fpois
+        
+        f[3, ::] -= fpois
+        f[6, ::] -= fpois
+        f[7, ::] -= fpois
+        
     if iobst:
         i = nx // 4
         jbot = ny // 2 - nobst // 2
@@ -172,3 +160,4 @@ for istep in range(1, nsteps + 1):
             vort = np.roll(u, [0, 1]) - np.roll(u, [0, -1]) - np.roll(
                 v, [1, 0]) + np.roll(v, [-1, 0])
             file.write(vort[1:nx + 1, 1:ny + 1].tobytes("F"))
+print(np.var(u), np.var(v), np.var(rho))
