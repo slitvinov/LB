@@ -4,7 +4,7 @@ import sys
 import numpy as np
 import re
 
-nx, ny = 64, 128
+nx, ny = 64 * 8, 128 * 8
 plt.axis("off")
 plt.axis("equal")
 plt.tight_layout()
@@ -16,4 +16,3 @@ for path in sys.argv[1:]:
     png = re.sub("\.raw$", "", path) + ".png"
     print(png)
     plt.savefig(png)
-
