@@ -8,7 +8,7 @@ c     =================================================
       common /constants/ cs2, cs22, cssq, omega, fpois, den, visc ,
      $     w0, w1, w2
       common /phys/ rho0, u0, v0, uf, fom
-      common /arrays/ iflag(nx, ny) ,
+      common /arrays/
      $     u(0 : nx + 1, 0 : ny + 1), v(0 : nx + 1, 0 : ny +1) ,
      $     rho(0 : nx + 1, 0 : ny +1) ,
      $     feq(0 : npop - 1, 0 : nx + 1, 0 : ny +1) ,
