@@ -128,7 +128,6 @@ c     random amplitude
       do j = 0, ny+1
          do i = 0, nx+1
             do ip = 0, npop - 1
-               f(ip, i, j) = feq(ip, i, j)
                rr = 2.* rand(iseed) - 1.
                f(ip ,i,j) =(1. + ramp * rr)* rho0 / float(npop)
                iseed = iseed + 1

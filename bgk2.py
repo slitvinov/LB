@@ -35,7 +35,7 @@ nx = 128
 ny = 64
 npop = 9
 
-nstep = 101
+nsteps = 10001
 nout = 2000
 ndiag = 2000
 omega = 1.5
@@ -82,19 +82,14 @@ ramp = 0.01
 random.seed(1234)
 for j in range(ny + 2):
     for i in range(nx + 2):
-        for ip in range(0, npop):
-            f[ip, i, j] = feq[ip, i, j]
+        for ip in range(npop):
             rr = random.uniform(-1, 1)
-            f[ip, i, j] = (1. + ramp * rr) * rho0 / float(npop)
+            f[ip, i, j] = (1 + ramp * rr) * rho0 / npop
 
-iconf = 0
 plt.ioff()
 plt.axis("off")
 plt.tight_layout()
-for istep in range(nstep):
-    if istep % 10 == 0:
-        plt.imshow(np.transpose(u), matplotlib.cm.jet)
-        plt.savefig("u.%08d.png" % istep)
+for istep in range(1, nsteps + 1):
     # mbc
     for j in range(1, ny + 1):
         f[1, 0, j] = f[1, nx, j]
@@ -151,7 +146,7 @@ for istep in range(nstep):
 
     equil()
     # colli
-    for k in range(0, npop):
+    for k in range(npop):
         for j in range(1, ny + 1):
             for i in range(1, nx + 1):
                 f[k, i, j] = f[k, i, j] * (1.0 - omega) + omega * feq[k, i, j]
@@ -181,3 +176,6 @@ for istep in range(nstep):
         f[6, i, jtop] = f[8, i - 1, jtop + 1]
         f[4, i, jbot] = f[2, i, jbot - 1]
         f[7, i, jbot] = f[5, i - 1, jbot - 1]
+    if istep % 100 == 0:
+        plt.imshow(np.transpose(u[1:nx + 1, 1:ny + 1]), matplotlib.cm.jet)
+        plt.savefig("u.%08d.png" % istep)
