@@ -193,7 +193,6 @@ c     hydro variables
 c     equils are written explicitly to avoid multplications by zero
       do j = 0, ny+1
          do i = 0, nx+1
-            rl = rho(i,j)
             ul = u(i,j) / cs2
             vl = v(i,j) / cs2
             uv = ul * vl

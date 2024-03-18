@@ -3,34 +3,30 @@ import numpy as np
 # 0 = rest particles, 1-4 = velocity 1, 4-9 = velocity sqrt(2)
 
 def equil():
-    for j in range(ny + 2):
-        for i in range(nx + 2):
-            rl = rho[i, j]
-            ul = u[i, j] / cs2
-            vl = v[i, j] / cs2
-            uv = ul * vl
-            usq = u[i, j] * u[i, j]
-            vsq = v[i, j] * v[i, j]
-            sumsq = (usq + vsq) / cs22
-            sumsq2 = sumsq * (1.0 - cs2) / cs2
-            u2 = usq / cssq
-            v2 = vsq / cssq
-            feq[0, i, j] = w0 * (1.0 - sumsq)
+    ul = u / cs2
+    vl = v / cs2
+    uv = ul * vl
+    usq = u * u
+    vsq = v * v
+    sumsq = (usq + vsq) / cs22
+    sumsq2 = sumsq * (1.0 - cs2) / cs2
+    u2 = usq / cssq
+    v2 = vsq / cssq
+    feq[0] = w0 * (1.0 - sumsq)
 
-            feq[1, i, j] = w1 * (1.0 - sumsq + u2 + ul)
-            feq[2, i, j] = w1 * (1.0 - sumsq + v2 + vl)
-            feq[3, i, j] = w1 * (1.0 - sumsq + u2 - ul)
-            feq[4, i, j] = w1 * (1.0 - sumsq + v2 - vl)
+    feq[1] = w1 * (1.0 - sumsq + u2 + ul)
+    feq[2] = w1 * (1.0 - sumsq + v2 + vl)
+    feq[3] = w1 * (1.0 - sumsq + u2 - ul)
+    feq[4] = w1 * (1.0 - sumsq + v2 - vl)
 
-            feq[5, i, j] = w2 * (1.0 + sumsq2 + ul + vl + uv)
-            feq[6, i, j] = w2 * (1.0 + sumsq2 - ul + vl - uv)
-            feq[7, i, j] = w2 * (1.0 + sumsq2 - ul - vl + uv)
-            feq[8, i, j] = w2 * (1.0 + sumsq2 + ul - vl - uv)
+    feq[5] = w2 * (1.0 + sumsq2 + ul + vl + uv)
+    feq[6] = w2 * (1.0 + sumsq2 - ul + vl - uv)
+    feq[7] = w2 * (1.0 + sumsq2 - ul - vl + uv)
+    feq[8] = w2 * (1.0 + sumsq2 + ul - vl - uv)
 
 
 nx = 128
 ny = 64
-npop = 9
 nsteps = 101
 omega = 1.5
 iforce = True
@@ -61,7 +57,7 @@ fpois = rho0 * fpois / 6.
 u = np.full((nx + 2, ny + 2), u0, np.float64)
 v = np.full((nx + 2, ny + 2), v0, np.float64)
 rho = np.full((nx + 2, ny + 2), rho0, np.float64)
-feq = np.empty((npop, nx + 2, ny + 2), np.float64)
+feq = np.empty((9, nx + 2, ny + 2), np.float64)
 equil()
 f = np.copy(feq)
 for istep in range(1, nsteps + 1):
@@ -126,16 +122,16 @@ for istep in range(1, nsteps + 1):
     equil()
     # collision step
     f = f * (1.0 - omega) + omega * feq
-    
+
     if iforce:
         f[1, ::] += fpois
         f[5, ::] += fpois
         f[8, ::] += fpois
-        
+
         f[3, ::] -= fpois
         f[6, ::] -= fpois
         f[7, ::] -= fpois
-        
+
     if iobst:
         i = nx // 4
         jbot = ny // 2 - nobst // 2
