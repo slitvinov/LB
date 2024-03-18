@@ -1,7 +1,5 @@
 import numpy as np
 import random
-import matplotlib.pyplot as plt
-import matplotlib
 
 
 # equil
@@ -34,13 +32,14 @@ def equil():
 nx = 128
 ny = 64
 npop = 9
-
 nsteps = 10001
 nout = 2000
 ndiag = 2000
 omega = 1.5
 iforce = True
-rho0, u0, v0 = 1, 0.1, 0
+rho0 = 1
+u0 = 0.1
+v0 = 0
 uf = 0.1
 iobst = True
 nobst = 8
@@ -86,9 +85,6 @@ for j in range(ny + 2):
             rr = random.uniform(-1, 1)
             f[ip, i, j] = (1 + ramp * rr) * rho0 / npop
 
-plt.ioff()
-plt.axis("off")
-plt.tight_layout()
 for istep in range(1, nsteps + 1):
     # mbc
     for j in range(1, ny + 1):
@@ -177,5 +173,11 @@ for istep in range(1, nsteps + 1):
         f[4, i, jbot] = f[2, i, jbot - 1]
         f[7, i, jbot] = f[5, i - 1, jbot - 1]
     if istep % 100 == 0:
-        plt.imshow(np.transpose(u[1:nx + 1, 1:ny + 1]), matplotlib.cm.jet)
-        plt.savefig("u.%08d.png" % istep)
+        path = "bgk.%08d.raw" % istep
+        with open(path, "wb") as file:
+            file.write(u[1:nx + 1, 1:ny + 1].tobytes("F"))
+            file.write(v[1:nx + 1, 1:ny + 1].tobytes("F"))
+            file.write(rho[1:nx + 1, 1:ny + 1].tobytes("F"))
+            vort = np.roll(u, [0, 1]) - np.roll(u, [0, -1]) - np.roll(
+                v, [1, 0]) + np.roll(v, [-1, 0])
+            file.write(vort[1:nx + 1, 1:ny + 1].tobytes("F"))
