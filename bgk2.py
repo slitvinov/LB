@@ -27,7 +27,7 @@ def equil():
 
 nx = 128
 ny = 64
-nsteps = 101
+nsteps = 1001
 omega = 1.5
 iforce = True
 rho0 = 1
@@ -62,26 +62,24 @@ equil()
 f = np.copy(feq)
 for istep in range(1, nsteps + 1):
     # inlet
-    f[1, 0, :] = f[1, nx, :]
-    f[5, 0, :] = f[5, nx, :]
-    f[8, 0, :] = f[8, nx, :]
+    f[1, 0, 1 : ny + 1] = f[1, nx, 1 : ny + 1]
+    f[5, 0, 1 : ny + 1] = f[5, nx, 1 : ny + 1]
+    f[8, 0, 1 : ny + 1] = f[8, nx, 1 : ny + 1]
 
     # outlet
-    f[3, nx + 1, :] = f[3, 1, :]
-    f[6, nx + 1, :] = f[6, 1, :]
-    f[7, nx + 1, :] = f[7, 1, :]
+    f[3, nx + 1, 1 : ny + 1] = f[3, 1, 1 : ny + 1]
+    f[6, nx + 1, 1 : ny + 1] = f[6, 1, 1 : ny + 1]
+    f[7, nx + 1, 1 : ny + 1] = f[7, 1, 1 : ny + 1]
 
     # bounce back (north)
-    for i in range(1, nx + 1):
-        f[4, i, ny + 1] = f[2, i, ny]
-        f[8, i, ny + 1] = f[6, i + 1, ny]
-        f[7, i, ny + 1] = f[5, i - 1, ny]
+    f[4, 1 : nx + 1, ny + 1] = f[2, 1 : nx + 1, ny]
+    f[8, 1 : nx + 1, ny + 1] = f[6, 2 :, ny]
+    f[7, 1 : nx + 1, ny + 1] = f[5, : nx, ny]
 
     # bounce back (source)
-    for i in range(1, nx + 1):
-        f[2, i, 0] = f[4, i, 1]
-        f[6, i, 0] = f[8, i - 1, 1]
-        f[5, i, 0] = f[7, i + 1, 1]
+    f[2, 1 : nx + 1, 0] = f[4, 1 : nx + 1, 1]
+    f[6, 1 : nx + 1, 0] = f[8, : nx, 1]
+    f[5, 1 : nx + 1, 0] = f[7, 2 : , 1]
 
     # corners
     f[8, 0, ny + 1] = f[6, 1, ny]
@@ -90,24 +88,14 @@ for istep in range(1, nsteps + 1):
     f[6, nx + 1, 0] = f[8, nx, 1]
 
     # move
-    for j in range(ny, 0, -1):
-        for i in range(1, nx + 1):
-            f[2, i, j] = f[2, i, j - 1]
-            f[6, i, j] = f[6, i + 1, j - 1]
-    for j in range(ny, 0, -1):
-        for i in range(nx, 0, -1):
-            f[1, i, j] = f[1, i - 1, j]
-            f[5, i, j] = f[5, i - 1, j - 1]
-
-    for j in range(1, ny + 1):
-        for i in range(nx, 0, -1):
-            f[4, i, j] = f[4, i, j + 1]
-            f[8, i, j] = f[8, i - 1, j + 1]
-
-    for j in range(1, ny + 1):
-        for i in range(1, nx + 1):
-            f[3, i, j] = f[3, i + 1, j]
-            f[7, i, j] = f[7, i + 1, j + 1]
+    f[2, 1 : nx + 1, 1 : ny + 1] = f[2, 1 : nx + 1, : ny]
+    f[6, 1 : nx + 1, 1 : ny + 1] = f[6, 2 : :, : ny]
+    f[1, 1 : nx + 1, 1 : ny + 1] = f[1, : nx, 1 : ny + 1]
+    f[5, 1 : nx + 1, 1 : ny + 1] = f[5, : nx, : ny]
+    f[4, 1 : nx + 1, 1 : ny + 1] = f[4, 1 : nx + 1, 2 : ]
+    f[8, 1 : nx + 1, 1 : ny + 1] = f[8, : nx, 2 : ]
+    f[3, 1 : nx, 1 : ny + 1] = f[3, 2 : nx + 1, 1 : ny + 1]
+    f[7, 1 : nx, 1 : ny + 1] = f[7, 2 : nx + 1, 2 : ]
 
     # hydrovar
     rho = f[1] + f[2] + f[3] + f[4] + f[5] + f[6] + f[7] + f[8] + f[0]
@@ -115,7 +103,7 @@ for istep in range(1, nsteps + 1):
     v = (f[5] + f[2] + f[6] - f[7] - f[4] - f[8]) / rho
     equil()
     # collision step
-    f = f * (1.0 - omega) + omega * feq
+    f[:] = f * (1.0 - omega) + omega * feq
 
     if iforce:
         f[1] += fpois
