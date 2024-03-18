@@ -1,6 +1,5 @@
 c     D2Q9 lattice, BGK version
 c     0= rest particles, 1-4, nearest-neigh(nn), 5-8(nnn)
-      program bgk2d
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
       call input
