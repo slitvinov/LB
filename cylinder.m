@@ -27,54 +27,54 @@ v = zeros(lx,ly);
 rho = 1;
 for i=1:9
   cu = 3*(cx(i)*u+cy(i)*v);
-  fIn(i,:,:) = rho .* t(i) .* ( 1 + cu + 1/2*(cu.*cu) - 3/2*(u.^2+v.^2) );
+  f0(i,:,:) = rho .* t(i) .* ( 1 + cu + 1/2*(cu.*cu) - 3/2*(u.^2+v.^2) );
 end
 
 for cycle = 1:maxT
-  rho = sum(fIn);
-  u  = reshape ( (cx * reshape(fIn,9,lx*ly)), 1,lx,ly) ./rho;
-  v  = reshape ( (cy * reshape(fIn,9,lx*ly)), 1,lx,ly) ./rho;
+  rho = sum(f0);
+  u  = reshape ( (cx * reshape(f0,9,lx*ly)), 1,lx,ly) ./rho;
+  v  = reshape ( (cy * reshape(f0,9,lx*ly)), 1,lx,ly) ./rho;
 			 # MACROSCOPIC (DIRICHLET) BOUNDARY CONDITIONS
 			 # Inlet: Poiseuille profile
   y_phys = col-1.5;
   u(:,in,col) = 4 * uMax / (L*L) * (y_phys.*L-y_phys.*y_phys);
   v(:,in,col) = 0;
-  rho(:,in,col) = 1 ./ (1-u(:,in,col)) .* ( sum(fIn([1,3,5],in,col)) + 2*sum(fIn([4,7,8],in,col)) );
+  rho(:,in,col) = 1 ./ (1-u(:,in,col)) .* ( sum(f0([1,3,5],in,col)) + 2*sum(f0([4,7,8],in,col)) );
 
 				# Outlet: Constant pressure
   rho(:,out,col) = 1;
-  u(:,out,col) = -1 + 1 ./ (rho(:,out,col)) .* ( sum(fIn([1,3,5],out,col)) + 2*sum(fIn([2,6,9],out,col)) );
+  u(:,out,col) = -1 + 1 ./ (rho(:,out,col)) .* ( sum(f0([1,3,5],out,col)) + 2*sum(f0([2,6,9],out,col)) );
   v(:,out,col)  = 0;
 
 		  # MICROSCOPIC BOUNDARY CONDITIONS: INLET (Zou/He BC)
-  fIn(2,in,col) = fIn(4,in,col) + 2/3*rho(:,in,col).*u(:,in,col);
-  fIn(6,in,col) = fIn(8,in,col) + 1/2*(fIn(5,in,col)-fIn(3,in,col)) ...
+  f0(2,in,col) = f0(4,in,col) + 2/3*rho(:,in,col).*u(:,in,col);
+  f0(6,in,col) = f0(8,in,col) + 1/2*(f0(5,in,col)-f0(3,in,col)) ...
 		  + 1/2*rho(:,in,col).*v(:,in,col) ...
 		  + 1/6*rho(:,in,col).*u(:,in,col);
-  fIn(9,in,col) = fIn(7,in,col) + 1/2*(fIn(3,in,col)-fIn(5,in,col)) ...
+  f0(9,in,col) = f0(7,in,col) + 1/2*(f0(3,in,col)-f0(5,in,col)) ...
 		  - 1/2*rho(:,in,col).*v(:,in,col) ...
 		  + 1/6*rho(:,in,col).*u(:,in,col);
 
 		 # MICROSCOPIC BOUNDARY CONDITIONS: OUTLET (Zou/He BC)
-  fIn(4,out,col) = fIn(2,out,col) - 2/3*rho(:,out,col).*u(:,out,col);
-  fIn(8,out,col) = fIn(6,out,col) + 1/2*(fIn(3,out,col)-fIn(5,out,col)) ...
+  f0(4,out,col) = f0(2,out,col) - 2/3*rho(:,out,col).*u(:,out,col);
+  f0(8,out,col) = f0(6,out,col) + 1/2*(f0(3,out,col)-f0(5,out,col)) ...
 		   - 1/2*rho(:,out,col).*v(:,out,col) ...
 		   - 1/6*rho(:,out,col).*u(:,out,col);
-  fIn(7,out,col) = fIn(9,out,col) + 1/2*(fIn(5,out,col)-fIn(3,out,col)) ...
+  f0(7,out,col) = f0(9,out,col) + 1/2*(f0(5,out,col)-f0(3,out,col)) ...
 		   + 1/2*rho(:,out,col).*v(:,out,col) ...
 		   - 1/6*rho(:,out,col).*u(:,out,col);
   for i=1:9
     cu = 3*(cx(i)*u+cy(i)*v);
     fEq(i,:,:)  = rho .* t(i) .* ...
 		  ( 1 + cu + 1/2*(cu.*cu)  - 3/2*(u.^2+v.^2) );
-    fOut(i,:,:) = fIn(i,:,:) - omega .* (fIn(i,:,:)-fEq(i,:,:));
+    f1(i,:,:) = f0(i,:,:) - omega .* (f0(i,:,:)-fEq(i,:,:));
   end
 				# OBSTACLE (BOUNCE-BACK)
   for i=1:9
-    fOut(i,bbRegion) = fIn(opp(i),bbRegion);
+    f1(i,bbRegion) = f0(opp(i),bbRegion);
   end
   for i=1:9
-    fIn(i,:,:) = circshift(fOut(i,:,:), [0,cx(i),cy(i)]);
+    f0(i,:,:) = circshift(f1(i,:,:), [0,cx(i),cy(i)]);
   end
   if (mod(cycle,tPlot)==0)
     path = sprintf("cyl.%09d.raw", cycle);
