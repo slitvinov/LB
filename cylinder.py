@@ -14,7 +14,7 @@ tPlot = 50
 t = np.array([4 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 36, 1 / 36, 1 / 36, 1 / 36])
 cx = np.array([0, 1, 0, -1, 0, 1, -1, -1, 1])
 cy = np.array([0, 0, 1, 0, -1, 1, 1, -1, -1])
-opp = np.array([1, 4, 5, 2, 3, 8, 9, 6, 7])
+opp = np.array([0, 3, 4, 1, 2, 7, 8, 5, 6])
 col = np.arange(1, ny - 1)
 x, y = np.meshgrid(np.arange(ny), np.arange(nx))
 obst = (x - obst_x) ** 2 + (y - obst_y) ** 2 <= obst_r ** 2
@@ -46,27 +46,27 @@ for cycle in range(maxT):
 
     # outlet: Constant pressure
     rho[nx - 1, col] = 1
-    u[:, nx - 1, col] = -1 + 1 / (rho[:, nx - 1, col]) * (np.sum(f0[[0, 2, 4], nx - 1, col], axis=0)
-                                                         + 2 * np.sum(f0[[1, 5, 8], nx - 1, col], axis=0))
-    v[:, nx - 1, col] = 0
+    u[nx - 1, col] = -1 + 1 / (rho[nx - 1, col]) * (np.sum(f0[[0, 2, 4], nx - 1][:, col], axis=0)
+                                                         + 2 * np.sum(f0[[1, 5, 8], nx - 1][:, col], axis=0))
+    v[nx - 1, col] = 0
 
     # MICROSCOPIC BOUNDARY CONDITIONS: inlet (Zou/He BC)
-    f0[1, 0, col] = f0[3, 0, col] + 2 / 3 * rho[:, 0, col] * u[:, 0, col]
+    f0[1, 0, col] = f0[3, 0, col] + 2 / 3 * rho[0, col] * u[0, col]
     f0[5, 0, col] = f0[7, 0, col] + 1 / 2 * (f0[4, 0, col] - f0[2, 0, col]) \
-                    + 1 / 2 * rho[:, 0, col] * v[:, 0, col] \
-                    + 1 / 6 * rho[:, 0, col] * u[:, 0, col]
+                    + 1 / 2 * rho[0, col] * v[0, col] \
+                    + 1 / 6 * rho[0, col] * u[0, col]
     f0[8, 0, col] = f0[6, 0, col] + 1 / 2 * (f0[2, 0, col] - f0[4, 0, col]) \
-                    - 1 / 2 * rho[:, 0, col] * v[:, 0, col] \
-                    + 1 / 6 * rho[:, 0, col] * u[:, 0, col]
+                    - 1 / 2 * rho[0, col] * v[0, col] \
+                    + 1 / 6 * rho[0, col] * u[0, col]
 
     # MICROSCOPIC BOUNDARY CONDITIONS: outlet (Zou/He BC)
-    f0[3, nx - 1, col] = f0[1, nx - 1, col] - 2 / 3 * rho[:, nx - 1, col] * u[:, nx - 1, col]
+    f0[3, nx - 1, col] = f0[1, nx - 1, col] - 2 / 3 * rho[nx - 1, col] * u[nx - 1, col]
     f0[7, nx - 1, col] = f0[5, nx - 1, col] + 1 / 2 * (f0[2, nx - 1, col] - f0[4, nx - 1, col]) \
-                         - 1 / 2 * rho[:, nx - 1, col] * v[:, nx - 1, col] \
-                         - 1 / 6 * rho[:, nx - 1, col] * u[:, nx - 1, col]
+                         - 1 / 2 * rho[nx - 1, col] * v[nx - 1, col] \
+                         - 1 / 6 * rho[nx - 1, col] * u[nx - 1, col]
     f0[6, nx - 1, col] = f0[8, nx - 1, col] + 1 / 2 * (f0[4, nx - 1, col] - f0[2, nx - 1, col]) \
-                         + 1 / 2 * rho[:, nx - 1, col] * v[:, nx - 1, col] \
-                         - 1 / 6 * rho[:, nx - 1, col] * u[:, nx - 1, col]
+                         + 1 / 2 * rho[nx - 1, col] * v[nx - 1, col] \
+                         - 1 / 6 * rho[nx - 1, col] * u[nx - 1, col]
 
     # Calculate equilibrium distribution
     feq = np.zeros_like(f0)
@@ -78,7 +78,8 @@ for cycle in range(maxT):
     f1 = f0 - omega * (f0 - feq)
 
     # Bounce-back boundary condition
-    f1[:, bbRegion[0], bbRegion[1]] = f0[opp, bbRegion[0], bbRegion[1]]
+    for i in range(9):
+        f1[i, bbRegion[0], bbRegion[1]] = f0[opp[i], bbRegion[0], bbRegion[1]]
 
     # Streaming step
     for i in range(9):
