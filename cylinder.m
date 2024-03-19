@@ -62,9 +62,9 @@ for cycle = 1:maxT
 		   - 1/6*rho(:,nx,col).*u(:,nx,col);
   for i=1:9
     cu = 3*(cx(i)*u+cy(i)*v);
-    f0(i,:,:)  = rho .* t(i) .* ...
+    feq(i,:,:)  = rho .* t(i) .* ...
 		  ( 1 + cu + 1/2*(cu.*cu)  - 3/2*(u.^2+v.^2) );
-    f1(i,:,:) = f0(i,:,:) - omega .* (f0(i,:,:)-f0(i,:,:));
+    f1(i,:,:) = f0(i,:,:) - omega .* (f0(i,:,:)-feq(i,:,:));
   end
 				# OBSTACLE (BOUNCE-BACK)
   for i=1:9
