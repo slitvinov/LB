@@ -16,6 +16,9 @@ cx = [  0,   1,  0, -1,  0,    1,  -1,  -1,   1];
 cy = [  0,   0,  1,  0, -1,    1,   1,  -1,  -1];
 opp = [ 1,   4,  5,  2,  3,    8,   9,   6,   7];
 col = [2:(ly-1)];
+in  = 1;   # position of inlet
+out = lx;  # position of outlet
+
 [y,x] = meshgrid(1:ly,1:lx);
 obst = ...                   # Location of cylinder
 (x-obst_x).^2 + (y-obst_y).^2 <= obst_r.^2;
@@ -40,32 +43,32 @@ for cycle = 1:maxT
 			 # MACROSCOPIC (DIRICHLET) BOUNDARY CONDITIONS
 			 # Inlet: Poiseuille profile
   y_phys = col-1.5;
-  ux(:,1,col) = 4 * uMax / (L*L) * (y_phys.*L-y_phys.*y_phys);
-  uy(:,1,col) = 0;
-  rho(:,1,col) = 1 ./ (1-ux(:,1,col)) .* ( sum(fIn([1,3,5],1,col)) + 2*sum(fIn([4,7,8],1,col)) );
-
+  ux(:,in,col) = 4 * uMax / (L*L) * (y_phys.*L-y_phys.*y_phys);
+  uy(:,in,col) = 0;
+  rho(:,in,col) = 1 ./ (1-ux(:,in,col)) .* ( sum(fIn([1,3,5],in,col)) + 2*sum(fIn([4,7,8],in,col)) );
+  
 				# Outlet: Constant pressure
-  rho(:,lx,col) = 1;
-  ux(:,lx,col) = -1 + 1 ./ (rho(:,lx,col)) .* ( sum(fIn([1,3,5],lx,col)) + 2*sum(fIn([2,6,9],lx,col)) );
-  uy(:,lx,col)  = 0;
+  rho(:,out,col) = 1;
+  ux(:,out,col) = -1 + 1 ./ (rho(:,out,col)) .* ( sum(fIn([1,3,5],out,col)) + 2*sum(fIn([2,6,9],out,col)) );
+  uy(:,out,col)  = 0;
 
 		  # MICROSCOPIC BOUNDARY CONDITIONS: INLET (Zou/He BC)
-  fIn(2,1,col) = fIn(4,1,col) + 2/3*rho(:,1,col).*ux(:,1,col);
-  fIn(6,1,col) = fIn(8,1,col) + 1/2*(fIn(5,1,col)-fIn(3,1,col)) ...
-		  + 1/2*rho(:,1,col).*uy(:,1,col) ...
-		  + 1/6*rho(:,1,col).*ux(:,1,col);
-  fIn(9,1,col) = fIn(7,1,col) + 1/2*(fIn(3,1,col)-fIn(5,1,col)) ...
-		  - 1/2*rho(:,1,col).*uy(:,1,col) ...
-		  + 1/6*rho(:,1,col).*ux(:,1,col);
+  fIn(2,in,col) = fIn(4,in,col) + 2/3*rho(:,in,col).*ux(:,in,col);
+  fIn(6,in,col) = fIn(8,in,col) + 1/2*(fIn(5,in,col)-fIn(3,in,col)) ...
+		  + 1/2*rho(:,in,col).*uy(:,in,col) ...
+		  + 1/6*rho(:,in,col).*ux(:,in,col);
+  fIn(9,in,col) = fIn(7,in,col) + 1/2*(fIn(3,in,col)-fIn(5,in,col)) ...
+		  - 1/2*rho(:,in,col).*uy(:,in,col) ...
+		  + 1/6*rho(:,in,col).*ux(:,in,col);
 
 		 # MICROSCOPIC BOUNDARY CONDITIONS: OUTLET (Zou/He BC)
-  fIn(4,lx,col) = fIn(2,lx,col) - 2/3*rho(:,lx,col).*ux(:,lx,col);
-  fIn(8,lx,col) = fIn(6,lx,col) + 1/2*(fIn(3,lx,col)-fIn(5,lx,col)) ...
-		   - 1/2*rho(:,lx,col).*uy(:,lx,col) ...
-		   - 1/6*rho(:,lx,col).*ux(:,lx,col);
-  fIn(7,lx,col) = fIn(9,lx,col) + 1/2*(fIn(5,lx,col)-fIn(3,lx,col)) ...
-		   + 1/2*rho(:,lx,col).*uy(:,lx,col) ...
-		   - 1/6*rho(:,lx,col).*ux(:,lx,col);
+  fIn(4,out,col) = fIn(2,out,col) - 2/3*rho(:,out,col).*ux(:,out,col);
+  fIn(8,out,col) = fIn(6,out,col) + 1/2*(fIn(3,out,col)-fIn(5,out,col)) ...
+		   - 1/2*rho(:,out,col).*uy(:,out,col) ...
+		   - 1/6*rho(:,out,col).*ux(:,out,col);
+  fIn(7,out,col) = fIn(9,out,col) + 1/2*(fIn(5,out,col)-fIn(3,out,col)) ...
+		   + 1/2*rho(:,out,col).*uy(:,out,col) ...
+		   - 1/6*rho(:,out,col).*ux(:,out,col);
 
 				# COLLISION STEP
   for i=1:9
@@ -84,12 +87,12 @@ for cycle = 1:maxT
   for i=1:9
     fIn(i,:,:) = circshift(fOut(i,:,:), [0,cx(i),cy(i)]);
   end
-  if (mod(cycle,tPlot)==0)
-    path = sprintf("cyl.%09d.raw", cycle);
-    fid = fopen(path, "w");
-    for field = {ux, uy, rho, rho}
-      fwrite(fid, field{1}, "double");      
-    end
-    fclose(fid);
+
+				# VISUALIZATION
+  if (mod(cycle,tPlot)==1)
+    u = reshape(sqrt(ux.^2+uy.^2),lx,ly);
+    u(bbRegion) = nan;
+    imagesc(u');
+    axis equal off; drawnow
   end
 end
