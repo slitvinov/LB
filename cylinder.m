@@ -14,9 +14,6 @@ cx = [  0    1   0  -1   0     1   -1   -1    1];
 cy = [  0    0   1   0  -1     1    1   -1   -1];
 opp = [ 1    4   5   2   3     8    9    6    7];
 col = 2:(ly-1);
-in  = 1;
-out = lx;
-
 [y,x] = meshgrid(1:ly,1:lx);
 obst = (x-obst_x).^2 + (y-obst_y).^2 <= obst_r.^2;
 obst(:,[1,ly]) = 1;
@@ -35,34 +32,34 @@ for cycle = 1:maxT
   u  = reshape ( (cx * reshape(f0,9,lx*ly)), 1,lx,ly) ./rho;
   v  = reshape ( (cy * reshape(f0,9,lx*ly)), 1,lx,ly) ./rho;
 			 # MACROSCOPIC (DIRICHLET) BOUNDARY CONDITIONS
-			 # Inlet: Poiseuille profile
+			 # 1let: Poiseuille profile
   y_phys = col-1.5;
-  u(:,in,col) = 4 * uMax / (L*L) * (y_phys.*L-y_phys.*y_phys);
-  v(:,in,col) = 0;
-  rho(:,in,col) = 1 ./ (1-u(:,in,col)) .* ( sum(f0([1,3,5],in,col)) + 2*sum(f0([4,7,8],in,col)) );
+  u(:,1,col) = 4 * uMax / (L*L) * (y_phys.*L-y_phys.*y_phys);
+  v(:,1,col) = 0;
+  rho(:,1,col) = 1 ./ (1-u(:,1,col)) .* ( sum(f0([1,3,5],1,col)) + 2*sum(f0([4,7,8],1,col)) );
 
-				# Outlet: Constant pressure
-  rho(:,out,col) = 1;
-  u(:,out,col) = -1 + 1 ./ (rho(:,out,col)) .* ( sum(f0([1,3,5],out,col)) + 2*sum(f0([2,6,9],out,col)) );
-  v(:,out,col)  = 0;
+				# Lxlet: Constant pressure
+  rho(:,lx,col) = 1;
+  u(:,lx,col) = -1 + 1 ./ (rho(:,lx,col)) .* ( sum(f0([1,3,5],lx,col)) + 2*sum(f0([2,6,9],lx,col)) );
+  v(:,lx,col)  = 0;
 
-		  # MICROSCOPIC BOUNDARY CONDITIONS: INLET (Zou/He BC)
-  f0(2,in,col) = f0(4,in,col) + 2/3*rho(:,in,col).*u(:,in,col);
-  f0(6,in,col) = f0(8,in,col) + 1/2*(f0(5,in,col)-f0(3,in,col)) ...
-		  + 1/2*rho(:,in,col).*v(:,in,col) ...
-		  + 1/6*rho(:,in,col).*u(:,in,col);
-  f0(9,in,col) = f0(7,in,col) + 1/2*(f0(3,in,col)-f0(5,in,col)) ...
-		  - 1/2*rho(:,in,col).*v(:,in,col) ...
-		  + 1/6*rho(:,in,col).*u(:,in,col);
+		  # MICROSCOPIC BOUNDARY CONDITIONS: 1LET (Zou/He BC)
+  f0(2,1,col) = f0(4,1,col) + 2/3*rho(:,1,col).*u(:,1,col);
+  f0(6,1,col) = f0(8,1,col) + 1/2*(f0(5,1,col)-f0(3,1,col)) ...
+		  + 1/2*rho(:,1,col).*v(:,1,col) ...
+		  + 1/6*rho(:,1,col).*u(:,1,col);
+  f0(9,1,col) = f0(7,1,col) + 1/2*(f0(3,1,col)-f0(5,1,col)) ...
+		  - 1/2*rho(:,1,col).*v(:,1,col) ...
+		  + 1/6*rho(:,1,col).*u(:,1,col);
 
-		 # MICROSCOPIC BOUNDARY CONDITIONS: OUTLET (Zou/He BC)
-  f0(4,out,col) = f0(2,out,col) - 2/3*rho(:,out,col).*u(:,out,col);
-  f0(8,out,col) = f0(6,out,col) + 1/2*(f0(3,out,col)-f0(5,out,col)) ...
-		   - 1/2*rho(:,out,col).*v(:,out,col) ...
-		   - 1/6*rho(:,out,col).*u(:,out,col);
-  f0(7,out,col) = f0(9,out,col) + 1/2*(f0(5,out,col)-f0(3,out,col)) ...
-		   + 1/2*rho(:,out,col).*v(:,out,col) ...
-		   - 1/6*rho(:,out,col).*u(:,out,col);
+		 # MICROSCOPIC BOUNDARY CONDITIONS: LXLET (Zou/He BC)
+  f0(4,lx,col) = f0(2,lx,col) - 2/3*rho(:,lx,col).*u(:,lx,col);
+  f0(8,lx,col) = f0(6,lx,col) + 1/2*(f0(3,lx,col)-f0(5,lx,col)) ...
+		   - 1/2*rho(:,lx,col).*v(:,lx,col) ...
+		   - 1/6*rho(:,lx,col).*u(:,lx,col);
+  f0(7,lx,col) = f0(9,lx,col) + 1/2*(f0(5,lx,col)-f0(3,lx,col)) ...
+		   + 1/2*rho(:,lx,col).*v(:,lx,col) ...
+		   - 1/6*rho(:,lx,col).*u(:,lx,col);
   for i=1:9
     cu = 3*(cx(i)*u+cy(i)*v);
     fEq(i,:,:)  = rho .* t(i) .* ...
