@@ -1,6 +1,7 @@
 #import numpy as np
 import torch as np
 import copy
+np.set_default_device('cuda')
 
 
 # 0 = rest particles, 1-4 = velocity 1, 4-9 = velocity sqrt(2)
