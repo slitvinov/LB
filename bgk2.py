@@ -92,10 +92,34 @@ def plate():
     f[7, i, jbot] = f[5, i - 1, jbot - 1]
 
 
-sc = 3
-nx = 256 * sc
-ny = 64 * sc
-nobst = 16 * sc
+def square():
+    s = ny // 8
+
+    x0 = nx // 4 - s
+    x1 = nx // 4 + s
+    y0 = ny // 2 - s
+    y1 = ny // 2 + s
+
+    f[4, x0:x1, y0] = f[2, x0:x1, y0 - 1]
+    f[8, x0:x1, y0] = f[6, x0 + 1:x1 + 1, y0 - 1]
+    f[7, x0:x1, y0] = f[5, x0 - 1:x1 - 1, y0 - 1]
+
+    f[2, x0:x1, y1] = f[4, x0:x1, y1 + 1]
+    f[6, x0:x1, y1] = f[8, x0 - 1:x1 - 1, y1 + 1]
+    f[5, x0:x1, y1] = f[7, x0 + 1:x1 + 1, y1 + 1]
+
+    f[3, x0, y0:y1] = f[1, x0 - 1, y0:y1]
+    f[7, x0, y0:y1] = f[5, x0 - 1, y0:y1]
+    f[6, x0, y0:y1] = f[8, x0 - 1, y0:y1]
+
+    f[3, x1, y0:y1] = f[1, x1 - 1, y0:y1]
+    f[7, x1, y0:y1] = f[5, x1 - 1, y0:y1]
+    f[6, x1, y0:y1] = f[8, x1 - 1, y0:y1]
+
+
+nx = 128
+ny = 64
+nobst = 8
 nsteps = 100001
 omega = 1.5
 iforce = True
@@ -116,7 +140,6 @@ cs2 = 1.0 / 3.0
 cs22 = 2.0 * cs2
 cssq = 2.0 / 9.0
 visc = (1.0 / omega - 0.5) * cs2
-# rey = u0 * ny / visc
 
 # applied force (based on Stokes problem)
 fpois = 8.0 * visc * uf / ny / ny
