@@ -4,3 +4,15 @@ css Univ. Press, 2001 Slightly readapted for the 2018 version of the
 css book Author: Sauro Succi Disclaimer: The code is a simple warm-up,
 css bug-freedom not guaranteed The author declines any responsibility
 css for any incorrect result obtained via this code.
+
+cylinder.m: Channel flow past a cylinderical
+	    obstacle, using a LB method
+Lattice Boltzmann sample in Matlab
+Copyright (C) 2006-2008 Jonas Latt
+Address: EPFL, 1015 Lausanne, Switzerland
+E-mail: jonas@lbmethod.org
+Get the most recent version of this file on LBMethod.org:
+  http://www.lbmethod.org/_media/numerics:cylinder.m
+
+Original implementaion of Zou/He boundary condition by
+Adriano Sciacovelli (see example "cavity.m")
