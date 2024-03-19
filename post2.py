@@ -14,5 +14,4 @@ for path in sys.argv[1:]:
     u, v, rho, vort = np.memmap(path, dtype=dtype, shape=(4, nx, ny))
     plt.imshow(u, matplotlib.cm.jet)
     png = re.sub("\.raw$", "", path) + ".png"
-    print(png)
     plt.savefig(png)
