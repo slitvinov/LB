@@ -77,18 +77,13 @@ for cycle = 1:maxT
 		  ( 1 + cu + 1/2*(cu.*cu)  - 3/2*(u.^2+v.^2) );
     fOut(i,:,:) = fIn(i,:,:) - omega .* (fIn(i,:,:)-fEq(i,:,:));
   end
-
 				# OBSTACLE (BOUNCE-BACK)
   for i=1:9
     fOut(i,bbRegion) = fIn(opp(i),bbRegion);
   end
-
-				# STREAMING STEP
   for i=1:9
     fIn(i,:,:) = circshift(fOut(i,:,:), [0,cx(i),cy(i)]);
   end
-
-				# VISUALIZATION
   if (mod(cycle,tPlot)==0)
     path = sprintf("cyl.%09d.raw", cycle);
     fid = fopen(path, "w");
