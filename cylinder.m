@@ -46,7 +46,7 @@ for cycle = 1:maxT
   ux(:,in,col) = 4 * uMax / (L*L) * (y_phys.*L-y_phys.*y_phys);
   uy(:,in,col) = 0;
   rho(:,in,col) = 1 ./ (1-ux(:,in,col)) .* ( sum(fIn([1,3,5],in,col)) + 2*sum(fIn([4,7,8],in,col)) );
-  
+
 				# Outlet: Constant pressure
   rho(:,out,col) = 1;
   ux(:,out,col) = -1 + 1 ./ (rho(:,out,col)) .* ( sum(fIn([1,3,5],out,col)) + 2*sum(fIn([2,6,9],out,col)) );
@@ -89,10 +89,12 @@ for cycle = 1:maxT
   end
 
 				# VISUALIZATION
-  if (mod(cycle,tPlot)==1)
-    u = reshape(sqrt(ux.^2+uy.^2),lx,ly);
-    u(bbRegion) = nan;
-    imagesc(u');
-    axis equal off; drawnow
+  if (mod(cycle,tPlot)==0)
+    path = sprintf("cyl.%09d.raw", cycle);
+    fid = fopen(path, "w");
+    for field = {ux, uy, rho, rho}
+      fwrite(fid, field{1}, "double");
+    end
+    fclose(fid);
   end
 end
