@@ -3,13 +3,17 @@ import matplotlib
 import sys
 import numpy as np
 import re
+import os
+import math
 
 sc = 16
-nx, ny = 128 * sc, 64 * sc
-dtype = np.float64
-
+dtype = np.dtype("float64")
+nfields = 4
 for path in sys.argv[1:]:
-    u, v, rho, vort = np.memmap(path, dtype=dtype, shape=(4, nx, ny))
+    size = os.path.getsize(path)
+    ny = math.isqrt(size // dtype.itemsize // nfields // 2)
+    nx = 2 * ny
+    u, v, rho, vort = np.memmap(path, dtype=dtype, shape=(4, ny, nx))
     plt.axis("off")
     plt.axis("equal")
     plt.tight_layout()
