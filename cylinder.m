@@ -38,7 +38,7 @@ for cycle = 1:maxT
   v(:,1,col) = 0;
   rho(:,1,col) = 1 ./ (1-u(:,1,col)) .* ( sum(f0([1,3,5],1,col)) + 2*sum(f0([4,7,8],1,col)) );
 
-				# Nxlet: Constant pressure
+				# outlet: Constant pressure
   rho(:,nx,col) = 1;
   u(:,nx,col) = -1 + 1 ./ (rho(:,nx,col)) .* ( sum(f0([1,3,5],nx,col)) + 2*sum(f0([2,6,9],nx,col)) );
   v(:,nx,col)  = 0;
