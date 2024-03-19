@@ -6,13 +6,12 @@ import re
 import os
 import math
 
-sc = 16
 dtype = np.dtype("float64")
 nfields = 4
 for path in sys.argv[1:]:
     size = os.path.getsize(path)
-    ny = math.isqrt(size // dtype.itemsize // nfields // 2)
-    nx = 2 * ny
+    ny = math.isqrt(size // dtype.itemsize // nfields // 4)
+    nx = 4 * ny
     u, v, rho, vort = np.memmap(path, dtype=dtype, shape=(4, ny, nx))
     plt.axis("off")
     plt.axis("equal")

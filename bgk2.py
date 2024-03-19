@@ -2,6 +2,7 @@ import numpy as np
 # import torch as np
 # np.set_default_device('cuda')
 import copy
+import numpy
 
 
 # 0 = rest particles, 1-4 = velocity 1, 4-9 = velocity sqrt(2)
@@ -74,12 +75,28 @@ def mbc():
     f[6, nx + 1, 0] = f[8, nx, 1]
 
 
+def plate():
+    i = nx // 8
+    jbot = ny // 2 - nobst // 2
+    jtop = ny // 2 + nobst // 2 + 1
+    for j in range(ny // 2 - nobst // 2, ny // 2 + nobst // 2 + 2):
+        f[1, i, j] = f[3, i + 1, j]
+        f[5, i, j] = f[7, i + 1, j + 1]
+        f[8, i, j] = f[6, i + 1, j - 1]
+        f[3, i, j] = f[1, i - 1, j]
+        f[7, i, j] = f[5, i - 1, j]
+        f[6, i, j] = f[8, i - 1, j]
+    f[2, i, jtop] = f[4, i, jtop + 1]
+    f[6, i, jtop] = f[8, i - 1, jtop + 1]
+    f[4, i, jbot] = f[2, i, jbot - 1]
+    f[7, i, jbot] = f[5, i - 1, jbot - 1]
+
+
 sc = 3
-nx = 128 * sc
+nx = 256 * sc
 ny = 64 * sc
-iobst = True
 nobst = 16 * sc
-nsteps = 10001
+nsteps = 100001
 omega = 1.5
 iforce = True
 rho0 = 1
@@ -87,6 +104,7 @@ u0 = 0.1
 v0 = 0
 uf = 0.1
 bc = pbc
+obst = plate
 
 # lattice weights
 w0 = 4.0 / 9.0
@@ -108,10 +126,11 @@ u = np.full((nx + 2, ny + 2), u0, dtype=np.float64)
 v = np.full((nx + 2, ny + 2), v0, dtype=np.float64)
 rho = np.full((nx + 2, ny + 2), rho0, dtype=np.float64)
 feq = np.empty((9, nx + 2, ny + 2), dtype=np.float64)
+f = np.empty((9, nx + 2, ny + 2), dtype=np.float64)
 equil()
 
 amplitude = 0.01
-f = feq * (1.0 + amplitude*np.rand(nx + 2, ny + 2))
+f[:] = feq * (1.0 + amplitude * numpy.random.randn(nx + 2, ny + 2))
 
 for istep in range(1, nsteps + 1):
     bc()
@@ -143,21 +162,7 @@ for istep in range(1, nsteps + 1):
         f[6] -= fpois
         f[7] -= fpois
 
-    if iobst:
-        i = nx // 4
-        jbot = ny // 2 - nobst // 2
-        jtop = ny // 2 + nobst // 2 + 1
-        for j in range(ny // 2 - nobst // 2, ny // 2 + nobst // 2 + 2):
-            f[1, i, j] = f[3, i + 1, j]
-            f[5, i, j] = f[7, i + 1, j + 1]
-            f[8, i, j] = f[6, i + 1, j - 1]
-            f[3, i, j] = f[1, i - 1, j]
-            f[7, i, j] = f[5, i - 1, j]
-            f[6, i, j] = f[8, i - 1, j]
-        f[2, i, jtop] = f[4, i, jtop + 1]
-        f[6, i, jtop] = f[8, i - 1, jtop + 1]
-        f[4, i, jbot] = f[2, i, jbot - 1]
-        f[7, i, jbot] = f[5, i - 1, jbot - 1]
+    obst()
     if istep % 1000 == 0:
         path = "bgk.%08d.raw" % istep
         with open(path, "wb") as file:
