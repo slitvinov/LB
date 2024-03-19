@@ -74,11 +74,11 @@ def mbc():
     f[6, nx + 1, 0] = f[8, nx, 1]
 
 
-sc = 4
+sc = 3
 nx = 128 * sc
 ny = 64 * sc
 iobst = True
-nobst = 8 * sc
+nobst = 16 * sc
 nsteps = 10001
 omega = 1.5
 iforce = True
@@ -109,7 +109,10 @@ v = np.full((nx + 2, ny + 2), v0, dtype=np.float64)
 rho = np.full((nx + 2, ny + 2), rho0, dtype=np.float64)
 feq = np.empty((9, nx + 2, ny + 2), dtype=np.float64)
 equil()
-f = feq[:]
+
+amplitude = 0.01
+f = feq * (1.0 + amplitude*np.rand(nx + 2, ny + 2))
+
 for istep in range(1, nsteps + 1):
     bc()
 
