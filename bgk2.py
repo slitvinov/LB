@@ -28,8 +28,8 @@ def equil():
     feq[8] = w2 * (1.0 + sumsq2 + ul - vl - uv)
 
 
-nx = 128 * 8
-ny = 64 * 8
+nx = 128 * 16
+ny = 64 * 16
 nsteps = 10001
 omega = 1.5
 iforce = True
@@ -38,7 +38,7 @@ u0 = 0.1
 v0 = 0
 uf = 0.1
 iobst = True
-nobst = 8 * 8
+nobst = 8 * 16
 
 # lattice weights
 w0 = 4.0 / 9.0
