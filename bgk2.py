@@ -139,7 +139,7 @@ for istep in range(1, nsteps + 1):
                     v, [-1, 0], [0, 1])
             for field in u, v, rho, vort:
                 if hasattr(field, "numpy"):
-                    field = field.detach().numpy()
+                    field = field.cpu().detach().numpy()
                 file.write(field[1:nx + 1, 1:ny + 1].tobytes("F"))
         print(np.var(u[1:nx + 1, 1:ny + 1]), np.var(v[1:nx + 1, 1:ny + 1]),
               np.var(rho[1:nx + 1, 1:ny + 1]))
