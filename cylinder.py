@@ -11,13 +11,14 @@ nu = uMax * 2. * obst_r / Re
 omega = 1. / (3 * nu + 1. / 2.)
 maxT = 400000
 tPlot = 50
-t = np.array([4 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 36, 1 / 36, 1 / 36, 1 / 36])
+t = np.array(
+    [4 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 36, 1 / 36, 1 / 36, 1 / 36])
 cx = np.array([0, 1, 0, -1, 0, 1, -1, -1, 1])
 cy = np.array([0, 0, 1, 0, -1, 1, 1, -1, -1])
 opp = np.array([0, 3, 4, 1, 2, 7, 8, 5, 6])
 col = np.arange(1, ny - 1)
 x, y = np.meshgrid(np.arange(ny), np.arange(nx))
-obst = (x - obst_x) ** 2 + (y - obst_y) ** 2 <= obst_r ** 2
+obst = (x - obst_x)**2 + (y - obst_y)**2 <= obst_r**2
 obst[:, [0, ny - 1]] = 1
 bbRegion = np.where(obst)
 L = ny - 2
@@ -29,7 +30,8 @@ f0 = np.zeros((9, nx, ny))
 
 for i in range(9):
     cu = 3 * (cx[i] * u + cy[i] * v)
-    f0[i, :, :] = rho * t[i] * (1 + cu + 1 / 2 * (cu * cu) - 3 / 2 * (u ** 2 + v ** 2))
+    f0[i, :, :] = rho * t[i] * (1 + cu + 1 / 2 * (cu * cu) - 3 / 2 *
+                                (u**2 + v**2))
 
 for cycle in range(maxT):
     rho = np.sum(f0, axis=0)
@@ -41,13 +43,16 @@ for cycle in range(maxT):
     y_phys = col - 1.5
     u[0, col] = 4 * uMax / (L * L) * (y_phys * L - y_phys * y_phys)
     v[0, col] = 0
-    rho[0, col] = 1 / (1 - u[0, col]) * (np.sum(f0[[0, 2, 4], 0][:, col], axis=0)
-                                         + 2 * np.sum(f0[[3, 6, 7], 0][:, col], axis=0))
+    rho[0,
+        col] = 1 / (1 -
+                    u[0, col]) * (np.sum(f0[[0, 2, 4], 0][:, col], axis=0) +
+                                  2 * np.sum(f0[[3, 6, 7], 0][:, col], axis=0))
 
     # outlet: Constant pressure
     rho[nx - 1, col] = 1
-    u[nx - 1, col] = -1 + 1 / (rho[nx - 1, col]) * (np.sum(f0[[0, 2, 4], nx - 1][:, col], axis=0)
-                                                         + 2 * np.sum(f0[[1, 5, 8], nx - 1][:, col], axis=0))
+    u[nx - 1, col] = -1 + 1 / (
+        rho[nx - 1, col]) * (np.sum(f0[[0, 2, 4], nx - 1][:, col], axis=0) +
+                             2 * np.sum(f0[[1, 5, 8], nx - 1][:, col], axis=0))
     v[nx - 1, col] = 0
 
     # MICROSCOPIC BOUNDARY CONDITIONS: inlet (Zou/He BC)
@@ -60,7 +65,8 @@ for cycle in range(maxT):
                     + 1 / 6 * rho[0, col] * u[0, col]
 
     # MICROSCOPIC BOUNDARY CONDITIONS: outlet (Zou/He BC)
-    f0[3, nx - 1, col] = f0[1, nx - 1, col] - 2 / 3 * rho[nx - 1, col] * u[nx - 1, col]
+    f0[3, nx - 1,
+       col] = f0[1, nx - 1, col] - 2 / 3 * rho[nx - 1, col] * u[nx - 1, col]
     f0[7, nx - 1, col] = f0[5, nx - 1, col] + 1 / 2 * (f0[2, nx - 1, col] - f0[4, nx - 1, col]) \
                          - 1 / 2 * rho[nx - 1, col] * v[nx - 1, col] \
                          - 1 / 6 * rho[nx - 1, col] * u[nx - 1, col]
@@ -72,7 +78,8 @@ for cycle in range(maxT):
     feq = np.zeros_like(f0)
     for i in range(9):
         cu = 3 * (cx[i] * u + cy[i] * v)
-        feq[i, :, :] = rho * t[i] * (1 + cu + 1 / 2 * (cu * cu) - 3 / 2 * (u ** 2 + v ** 2))
+        feq[i, :, :] = rho * t[i] * (1 + cu + 1 / 2 * (cu * cu) - 3 / 2 *
+                                     (u**2 + v**2))
 
     # Collision step
     f1 = f0 - omega * (f0 - feq)
