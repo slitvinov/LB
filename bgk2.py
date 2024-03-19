@@ -1,7 +1,7 @@
-#import numpy as np
-import torch as np
+import numpy as np
+# import torch as np
+# np.set_default_device('cuda')
 import copy
-np.set_default_device('cuda')
 
 
 # 0 = rest particles, 1-4 = velocity 1, 4-9 = velocity sqrt(2)
@@ -28,41 +28,25 @@ def equil():
     feq[8] = w2 * (1.0 + sumsq2 + ul - vl - uv)
 
 
-nx = 128 * 16
-ny = 64 * 16
-nsteps = 10001
-omega = 1.5
-iforce = True
-rho0 = 1
-u0 = 0.1
-v0 = 0
-uf = 0.1
-iobst = True
-nobst = 8 * 16
+def pbc():
+    f[1, 0, 1:ny + 1] = f[1, nx, 1:ny + 1]
+    f[5, 0, 1:ny + 1] = f[5, nx, 1:ny + 1]
+    f[8, 0, 1:ny + 1] = f[8, nx, 1:ny + 1]
 
-# lattice weights
-w0 = 4.0 / 9.0
-w1 = 1.0 / 9.0
-w2 = 1.0 / 36.0
+    f[3, nx + 1, 1:ny + 1] = f[3, 1, 1:ny + 1]
+    f[6, nx + 1, 1:ny + 1] = f[6, 1, 1:ny + 1]
+    f[7, nx + 1, 1:ny + 1] = f[7, 1, 1:ny + 1]
 
-# sound - speed and related constants
-cs2 = 1.0 / 3.0
-cs22 = 2.0 * cs2
-cssq = 2.0 / 9.0
-visc = (1.0 / omega - 0.5) * cs2
-rey = u0 * ny / visc
+    f[2, 1:nx + 1, 0] = f[2, 1:nx + 1, ny]
+    f[5, 1:nx + 1, 0] = f[5, 1:nx + 1, ny]
+    f[6, 1:nx + 1, 0] = f[6, 1:nx + 1, ny]
 
-# applied force (based on Stokes problem)
-fpois = 8.0 * visc * uf / ny / ny
-fpois = rho0 * fpois / 6.
+    f[4, 1:nx + 1, ny + 1] = f[4, 1:nx + 1, 1]
+    f[7, 1:nx + 1, ny + 1] = f[7, 1:nx + 1, 1]
+    f[8, 1:nx + 1, ny + 1] = f[8, 1:nx + 1, 1]
 
-u = np.full((nx + 2, ny + 2), u0, dtype=np.float64)
-v = np.full((nx + 2, ny + 2), v0, dtype=np.float64)
-rho = np.full((nx + 2, ny + 2), rho0, dtype=np.float64)
-feq = np.empty((9, nx + 2, ny + 2), dtype=np.float64)
-equil()
-f = feq[:]
-for istep in range(1, nsteps + 1):
+
+def mbc():
     # inlet
     f[1, 0, 1:ny + 1] = f[1, nx, 1:ny + 1]
     f[5, 0, 1:ny + 1] = f[5, nx, 1:ny + 1]
@@ -88,6 +72,46 @@ for istep in range(1, nsteps + 1):
     f[5, 0, 0] = f[7, 1, 1]
     f[7, nx + 1, ny + 1] = f[5, nx, ny]
     f[6, nx + 1, 0] = f[8, nx, 1]
+
+
+sc = 4
+nx = 128 * sc
+ny = 64 * sc
+iobst = True
+nobst = 8 * sc
+nsteps = 10001
+omega = 1.5
+iforce = True
+rho0 = 1
+u0 = 0.1
+v0 = 0
+uf = 0.1
+bc = pbc
+
+# lattice weights
+w0 = 4.0 / 9.0
+w1 = 1.0 / 9.0
+w2 = 1.0 / 36.0
+
+# sound - speed and related constants
+cs2 = 1.0 / 3.0
+cs22 = 2.0 * cs2
+cssq = 2.0 / 9.0
+visc = (1.0 / omega - 0.5) * cs2
+# rey = u0 * ny / visc
+
+# applied force (based on Stokes problem)
+fpois = 8.0 * visc * uf / ny / ny
+fpois = rho0 * fpois / 6.
+
+u = np.full((nx + 2, ny + 2), u0, dtype=np.float64)
+v = np.full((nx + 2, ny + 2), v0, dtype=np.float64)
+rho = np.full((nx + 2, ny + 2), rho0, dtype=np.float64)
+feq = np.empty((9, nx + 2, ny + 2), dtype=np.float64)
+equil()
+f = feq[:]
+for istep in range(1, nsteps + 1):
+    bc()
 
     # move
     f[2, 1:nx + 1, 1:ny + 1] = copy.deepcopy(f[2, 1:nx + 1, :ny])
@@ -131,7 +155,7 @@ for istep in range(1, nsteps + 1):
         f[6, i, jtop] = f[8, i - 1, jtop + 1]
         f[4, i, jbot] = f[2, i, jbot - 1]
         f[7, i, jbot] = f[5, i - 1, jbot - 1]
-    if istep % 100 == 0:
+    if istep % 1000 == 0:
         path = "bgk.%08d.raw" % istep
         with open(path, "wb") as file:
             vort = np.roll(u, [0, 1], [0, 1]) - np.roll(
