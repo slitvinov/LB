@@ -9,23 +9,18 @@ nu     = uMax * 2.*obst_r / Re;
 omega  = 1. / (3*nu+1./2.);
 maxT   = 400000;
 tPlot  = 50;
-
-				# D2Q9 LATTICE CONSTANTS
 t  = [4/9  1/9 1/9 1/9 1/9  1/36 1/36 1/36 1/36];
 cx = [  0    1   0  -1   0     1   -1   -1    1];
 cy = [  0    0   1   0  -1     1    1   -1   -1];
 opp = [ 1    4   5   2   3     8    9    6    7];
 col = 2:(ly-1);
-in  = 1;   # position of inlet
-out = lx;  # position of outlet
+in  = 1;
+out = lx;
 
 [y,x] = meshgrid(1:ly,1:lx);
-obst = ...                   # Location of cylinder
-(x-obst_x).^2 + (y-obst_y).^2 <= obst_r.^2;
-obst(:,[1,ly]) = 1;    # Location of top/bottom boundary
-bbRegion = find(obst); # Boolean mask for bounce-back cells
-
-		# INITIAL CONDITION: Poiseuille profile at equilibrium
+obst = (x-obst_x).^2 + (y-obst_y).^2 <= obst_r.^2;
+obst(:,[1,ly]) = 1;
+bbRegion = find(obst);
 L = ly-2; y_phys = y-1.5;
 u = 4 * uMax / (L*L) * (y_phys.*L-y_phys.*y_phys);
 v = zeros(lx,ly);
@@ -39,7 +34,6 @@ for cycle = 1:maxT
   rho = sum(fIn);
   u  = reshape ( (cx * reshape(fIn,9,lx*ly)), 1,lx,ly) ./rho;
   v  = reshape ( (cy * reshape(fIn,9,lx*ly)), 1,lx,ly) ./rho;
-
 			 # MACROSCOPIC (DIRICHLET) BOUNDARY CONDITIONS
 			 # Inlet: Poiseuille profile
   y_phys = col-1.5;
@@ -69,8 +63,6 @@ for cycle = 1:maxT
   fIn(7,out,col) = fIn(9,out,col) + 1/2*(fIn(5,out,col)-fIn(3,out,col)) ...
 		   + 1/2*rho(:,out,col).*v(:,out,col) ...
 		   - 1/6*rho(:,out,col).*u(:,out,col);
-
-				# COLLISION STEP
   for i=1:9
     cu = 3*(cx(i)*u+cy(i)*v);
     fEq(i,:,:)  = rho .* t(i) .* ...
