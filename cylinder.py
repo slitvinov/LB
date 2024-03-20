@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pylab as plt
 
 nx = 400
 ny = 100
@@ -16,10 +17,11 @@ cx = [0, 1, 0, -1, 0, 1, -1, -1, 1]
 cy = [0, 0, 1, 0, -1, 1, 1, -1, -1]
 opp = [0, 3, 4, 1, 2, 7, 8, 5, 6]
 col = np.arange(1, ny - 1)
-x, y = np.meshgrid(np.arange(ny), np.arange(nx))
+y, x = np.meshgrid(np.arange(ny), np.arange(nx))
 obst = (x - obst_x)**2 + (y - obst_y)**2 <= obst_r**2
-obst[:, [0, ny - 1]] = 1
-bbRegion = np.where(obst)
+obst[:, 0] = 1
+obst[:, ny - 1] = 1
+bb = np.where(obst)
 L = ny - 2
 y_phys = y - 1.5
 u = 4 * uMax / (L * L) * (y_phys * L - y_phys * y_phys)
@@ -75,15 +77,15 @@ for cycle in range(maxT):
     feq = np.zeros_like(f)
     for i in range(9):
         cu = 3 * (cx[i] * u + cy[i] * v)
-        feq[i, :, :] = rho * t[i] * (1 + cu + 1 / 2 * (cu * cu) - 3 / 2 *
-                                     (u**2 + v**2))
-
+        feq[i][:] = rho * t[i] * (1 + cu + 1 / 2 * (cu * cu) - 3 / 2 *
+                                  (u**2 + v**2))
     # Collision step
+    f1 = f * (1.0 - omega) + omega * feq
     f1 = f - omega * (f - feq)
 
     # Bounce-back boundary condition
     for i in range(9):
-        f1[i, bbRegion[0], bbRegion[1]] = f[opp[i], bbRegion[0], bbRegion[1]]
+        f1[i, bb[0], bb[1]] = f[opp[i], bb[0], bb[1]]
 
     # Streaming step
     for i in range(9):

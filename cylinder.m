@@ -17,7 +17,7 @@ col = 2:(ny-1);
 [y,x] = meshgrid(1:ny,1:nx);
 obst = (x-obst_x).^2 + (y-obst_y).^2 <= obst_r.^2;
 obst(:,[1,ny]) = 1;
-bbRegion = find(obst);
+bb = find(obst);
 L = ny-2; y_phys = y-1.5;
 u = 4 * uMax / (L*L) * (y_phys.*L-y_phys.*y_phys);
 v = zeros(nx,ny);
@@ -68,7 +68,7 @@ for cycle = 1:maxT
   end
 				# OBSTACLE (BOUNCE-BACK)
   for i=1:9
-    f1(i,bbRegion) = f0(opp(i),bbRegion);
+    f1(i,bb) = f0(opp(i),bb);
   end
   for i=1:9
     f0(i,:,:) = circshift(f1(i,:,:), [0,cx(i),cy(i)]);
