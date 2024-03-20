@@ -15,7 +15,6 @@ tPlot = 500
 t = 4 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 36, 1 / 36, 1 / 36, 1 / 36
 cx = 0, 1, 0, -1, 0, 1, -1, -1, 1
 cy = 0, 0, 1, 0, -1, 1, 1, -1, -1
-opp = 0, 3, 4, 1, 2, 7, 8, 5, 6
 col = np.arange(1, ny - 1)
 y, x = np.meshgrid(np.arange(ny), np.arange(nx))
 obst = (x - x0)**2 + (y - y0)**2 <= r0**2
@@ -81,8 +80,19 @@ for cycle in range(nsteps):
         feq[:] = rho * t[i] * (1 + c + 1 / 2 * (c * c) - 3 / 2 * (u**2 + v**2))
         f1[i][xd, yd] = f[i][xd, yd] * (1 - omega) + omega * feq[xd, yd]
 
-    for i in range(9):
-        f1[i][xb, yb] = f[opp[i]][xb, yb]
+    f1[0][xb, yb] = f[0][xb, yb]
+
+    f1[1][xb, yb] = f[3][xb, yb]
+    f1[3][xb, yb] = f[1][xb, yb]
+
+    f1[2][xb, yb] = f[4][xb, yb]
+    f1[4][xb, yb] = f[2][xb, yb]
+
+    f1[5][xb, yb] = f[7][xb, yb]
+    f1[7][xb, yb] = f[5][xb, yb]
+
+    f1[6][xb, yb] = f[8][xb, yb]
+    f1[8][xb, yb] = f[6][xb, yb]
 
     # Streaming step
     for i in range(9):
