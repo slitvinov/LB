@@ -3,8 +3,8 @@ import torch as np
 
 np.set_default_device('cuda')
 
-nx = 4000
-ny = 1000
+nx = 800
+ny = 200
 x0 = nx // 5 + 1
 y0 = ny // 2 + 3
 r0 = ny // 10 + 1
