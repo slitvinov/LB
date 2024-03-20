@@ -96,7 +96,7 @@ for cycle in range(nsteps):
     if cycle % tPlot == 0:
         for name, field in ["u", u], ["v", v], ["rho", rho]:
             print("%s[min,max,var]: %.3e %.3e %.3e" %
-                  (name, np.min(rho), np.max(rho), np.var(rho)))
+                  (name, np.min(field), np.max(field), np.var(field)))
         path = "cyl.%09d.raw" % cycle
         vort = np.roll(u, [0, 1], [0, 1]) - np.roll(
             u, [0, -1], [0, 1]) - np.roll(v, [1, 0], [0, 1]) + np.roll(
