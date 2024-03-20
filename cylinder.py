@@ -31,9 +31,8 @@ f = [np.empty((nx, ny)) for i in range(9)]
 f1 = [np.empty((nx, ny)) for i in range(9)]
 
 for i in range(9):
-    cu = 3 * (cx[i] * u + cy[i] * v)
-    f[i][:] = rho0 * t[i] * (1 + cu + 1 / 2 * (cu * cu) - 3 / 2 *
-                             (u**2 + v**2))
+    c = 3 * (cx[i] * u + cy[i] * v)
+    f[i][:] = rho0 * t[i] * (1 + c + 1 / 2 * (c * c) - 3 / 2 * (u**2 + v**2))
 
 for cycle in range(nsteps):
     rho[:] = f[0] + f[1] + f[2] + f[3] + f[4] + f[5] + f[6] + f[7] + f[8]
@@ -76,8 +75,8 @@ for cycle in range(nsteps):
 
     feq = np.zeros_like(f)
     for i in range(9):
-        cu = 3 * (cx[i] * u + cy[i] * v)
-        feq[i][:] = rho * t[i] * (1 + cu + 1 / 2 * (cu * cu) - 3 / 2 *
+        c = 3 * (cx[i] * u + cy[i] * v)
+        feq[i][:] = rho * t[i] * (1 + c + 1 / 2 * (c * c) - 3 / 2 *
                                   (u**2 + v**2))
     # Collision step
     for i in range(9):
