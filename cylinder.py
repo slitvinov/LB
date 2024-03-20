@@ -28,9 +28,10 @@ rho0 = 1
 rho = np.full((nx, ny), rho0, dtype=np.float64)
 f = [np.empty((nx, ny), dtype=np.float64) for i in range(9)]
 feq = np.empty((nx, ny), dtype=np.float64)
+c = np.empty((nx, ny), dtype=np.float64)
 
 for i in range(9):
-    c = 3 * (cx[i] * u + cy[i] * v)
+    c[:] = 3 * (cx[i] * u + cy[i] * v)
     f[i][:] = rho0 * t[i] * (1 + c + 1 / 2 * (c * c) - 3 / 2 * (u**2 + v**2))
 
 for cycle in range(nsteps):
@@ -81,7 +82,7 @@ for cycle in range(nsteps):
 
     # collision and bounce-back boundary condition
     for i in range(9):
-        c = 3 * (cx[i] * u + cy[i] * v)
+        c[:] = 3 * (cx[i] * u + cy[i] * v)
         feq[:] = rho * t[i] * (1 + c + 1 / 2 * (c * c) - 3 / 2 * (u**2 + v**2))
         f[i][~obst] = f[i][~obst] * (1 - omega) + omega * feq[~obst]
     f[1][obst], f[3][obst] = f[3][obst], f[1][obst]
