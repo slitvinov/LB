@@ -21,12 +21,12 @@ obst = (x - x0)**2 + (y - y0)**2 <= r0**2
 obst[:, 0] = 1
 obst[:, ny - 1] = 1
 L = ny - 2
-u = np.zeros((nx, ny))
-v = np.zeros((nx, ny))
+u = np.zeros((nx, ny), dtype=np.float64)
+v = np.zeros((nx, ny), dtype=np.float64)
 rho0 = 1
 rho = np.full((nx, ny), rho0, dtype=np.float64)
-f = [np.empty((nx, ny)) for i in range(9)]
-feq = np.empty((nx, ny))
+f = [np.empty((nx, ny), dtype=np.float64) for i in range(9)]
+feq = np.empty((nx, ny), dtype=np.float64)
 
 for i in range(9):
     c = 3 * (cx[i] * u + cy[i] * v)
