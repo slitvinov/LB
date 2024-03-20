@@ -1,16 +1,15 @@
 import numpy as np
-import matplotlib.pylab as plt
 
 nx = 400
 ny = 100
-obst_x = nx // 5 + 1
-obst_y = ny // 2 + 3
-obst_r = ny // 10 + 1
+x0 = nx // 5 + 1
+y0 = ny // 2 + 3
+r0 = ny // 10 + 1
 uMax = 0.1
 Re = 100
-nu = uMax * 2. * obst_r / Re
+nu = uMax * 2. * r0 / Re
 omega = 1. / (3 * nu + 1. / 2.)
-maxT = 400000
+nsteps = 400000
 tPlot = 500
 t = [4 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 36, 1 / 36, 1 / 36, 1 / 36]
 cx = [0, 1, 0, -1, 0, 1, -1, -1, 1]
@@ -18,7 +17,7 @@ cy = [0, 0, 1, 0, -1, 1, 1, -1, -1]
 opp = [0, 3, 4, 1, 2, 7, 8, 5, 6]
 col = np.arange(1, ny - 1)
 y, x = np.meshgrid(np.arange(ny), np.arange(nx))
-obst = (x - obst_x)**2 + (y - obst_y)**2 <= obst_r**2
+obst = (x - x0)**2 + (y - y0)**2 <= r0**2
 obst[:, 0] = 1
 obst[:, ny - 1] = 1
 bb = np.where(obst)
@@ -36,7 +35,7 @@ for i in range(9):
     f[i][:] = rho0 * t[i] * (1 + cu + 1 / 2 * (cu * cu) - 3 / 2 *
                              (u**2 + v**2))
 
-for cycle in range(maxT):
+for cycle in range(nsteps):
     rho[:] = f[0] + f[1] + f[2] + f[3] + f[4] + f[5] + f[6] + f[7] + f[8]
     u[:] = (f[1] - f[3] + f[5] - f[6] - f[7] + f[8]) / rho
     v[:] = (f[5] + f[2] + f[6] - f[7] - f[4] - f[8]) / rho
