@@ -28,7 +28,6 @@ v = np.zeros((nx, ny))
 rho0 = 1
 rho = np.full((nx, ny), rho0, dtype=np.float64)
 f = [np.empty((nx, ny)) for i in range(9)]
-f1 = [np.empty((nx, ny)) for i in range(9)]
 feq = np.empty((nx, ny))
 
 for i in range(9):
@@ -78,25 +77,15 @@ for cycle in range(nsteps):
     for i in range(9):
         c = 3 * (cx[i] * u + cy[i] * v)
         feq[:] = rho * t[i] * (1 + c + 1 / 2 * (c * c) - 3 / 2 * (u**2 + v**2))
-        f1[i][xd, yd] = f[i][xd, yd] * (1 - omega) + omega * feq[xd, yd]
-
-    f1[0][xb, yb] = f[0][xb, yb]
-
-    f1[1][xb, yb] = f[3][xb, yb]
-    f1[3][xb, yb] = f[1][xb, yb]
-
-    f1[2][xb, yb] = f[4][xb, yb]
-    f1[4][xb, yb] = f[2][xb, yb]
-
-    f1[5][xb, yb] = f[7][xb, yb]
-    f1[7][xb, yb] = f[5][xb, yb]
-
-    f1[6][xb, yb] = f[8][xb, yb]
-    f1[8][xb, yb] = f[6][xb, yb]
+        f[i][xd, yd] = f[i][xd, yd] * (1 - omega) + omega * feq[xd, yd]
+    f[1][xb, yb], f[3][xb, yb] = f[3][xb, yb], f[1][xb, yb]
+    f[2][xb, yb], f[4][xb, yb] = f[4][xb, yb], f[2][xb, yb]
+    f[5][xb, yb], f[7][xb, yb] = f[7][xb, yb], f[5][xb, yb]
+    f[6][xb, yb], f[8][xb, yb] = f[8][xb, yb], f[6][xb, yb]
 
     # Streaming step
     for i in range(9):
-        f[i][:] = np.roll(f1[i], (cx[i], cy[i]), axis=(0, 1))
+        f[i][:] = np.roll(f[i], (cx[i], cy[i]), axis=(0, 1))
 
     if cycle % tPlot == 0:
         print("%.3g %.3g %.3g" % (np.var(u), np.var(v), np.var(rho)))
