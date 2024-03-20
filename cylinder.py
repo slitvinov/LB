@@ -1,4 +1,5 @@
 import numpy as np
+# import torch as np
 
 nx = 400
 ny = 100
@@ -22,8 +23,7 @@ obst[:, 0] = 1
 obst[:, ny - 1] = 1
 bb = np.where(obst)
 L = ny - 2
-y_phys = y - 0.5
-u = 4 * uMax / (L * L) * (y_phys * L - y_phys * y_phys)
+u = np.zeros((nx, ny))
 v = np.zeros((nx, ny))
 rho0 = 1
 rho = np.full((nx, ny), rho0, dtype=np.float64)
@@ -40,7 +40,7 @@ for cycle in range(nsteps):
     u[:] = (f[1] - f[3] + f[5] - f[6] - f[7] + f[8]) / rho
     v[:] = (f[5] + f[2] + f[6] - f[7] - f[4] - f[8]) / rho
 
-    # inlet: Poiseuille profile
+    # inlet:
     y_phys = col - 0.5
     u[0, col] = 4 * uMax / (L * L) * (y_phys * L - y_phys * y_phys)
     v[0, col] = 0
