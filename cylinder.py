@@ -46,14 +46,14 @@ for cycle in range(nsteps):
         1 - u[0, 1 : ny - 1]) * (f[0][0, 1 : ny - 1] + f[2][0, 1 : ny - 1] + f[4][0, 1 : ny - 1] + 2 *
                           (f[3][0, 1 : ny - 1] + f[6][0, 1 : ny - 1] + f[7][0, 1 : ny - 1]))
 
-    # outlet: Constant pressure
+    # outlet: onstant pressure
     rho[nx - 1, 1 : ny - 1] = 1
     u[nx - 1, 1 : ny - 1] = -1 + 1 / (rho[nx - 1, 1 : ny - 1]) * (
         f[0][nx - 1, 1 : ny - 1] + f[2][nx - 1, 1 : ny - 1] + f[4][nx - 1, 1 : ny - 1] + 2 *
         (f[1][nx - 1, 1 : ny - 1] + f[5][nx - 1, 1 : ny - 1] + f[8][nx - 1, 1 : ny - 1]))
     v[nx - 1, 1 : ny - 1] = 0
 
-    # inlet (Zou/He BC)
+    # inlet: Zou/He BC
     f[1][0, 1 : ny - 1] = f[3][0, 1 : ny - 1] + 2 / 3 * rho[0, 1 : ny - 1] * u[0, 1 : ny - 1]
     f[5][0, 1 : ny - 1] = f[7][0, 1 : ny - 1] + 1 / 2 * (f[4][0, 1 : ny - 1] - f[2][0, 1 : ny - 1]) \
                     + 1 / 2 * rho[0, 1 : ny - 1] * v[0, 1 : ny - 1] \
@@ -62,7 +62,7 @@ for cycle in range(nsteps):
                     - 1 / 2 * rho[0, 1 : ny - 1] * v[0, 1 : ny - 1] \
                     + 1 / 6 * rho[0, 1 : ny - 1] * u[0, 1 : ny - 1]
 
-    # outlet (Zou/He BC)
+    # outlet: Zou/He BC
     f[3][nx - 1,
          1 : ny - 1] = f[1][nx - 1, 1 : ny - 1] - 2 / 3 * rho[nx - 1, 1 : ny - 1] * u[nx - 1, 1 : ny - 1]
     f[7][nx - 1, 1 : ny - 1] = f[5][nx - 1, 1 : ny - 1] + 1 / 2 * (
