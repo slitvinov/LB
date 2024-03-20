@@ -97,7 +97,7 @@ for cycle in range(nsteps):
         path = "cyl.%09d.raw" % cycle
         print("cylinder.py: %s" % path)
         for name, field in ["u", u], ["v", v], ["rho", rho]:
-            print("cylinder.py: %10s: min,max,var: %.3e %.3e %.3e" %
+            print("cylinder.py: %10s: min,max,var: %+.3e %+.3e %+.3e" %
                   (name, np.min(field), np.max(field), np.var(field)))
         vort = np.roll(u, [0, 1], [0, 1]) - np.roll(
             u, [0, -1], [0, 1]) - np.roll(v, [1, 0], [0, 1]) + np.roll(
