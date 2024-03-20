@@ -1,5 +1,6 @@
 # import numpy as np
 import torch as np
+
 np.set_default_device('cuda')
 
 nx = 4000
@@ -40,21 +41,24 @@ for cycle in range(nsteps):
     # inlet:
     col = np.arange(1, ny - 1)
     y_phys = col - 0.5
-    u[0, 1 : ny - 1] = 4 * u0 / (L * L) * (y_phys * L - y_phys * y_phys)
-    v[0, 1 : ny - 1] = 0
-    rho[0, 1 : ny - 1] = 1 / (
-        1 - u[0, 1 : ny - 1]) * (f[0][0, 1 : ny - 1] + f[2][0, 1 : ny - 1] + f[4][0, 1 : ny - 1] + 2 *
-                          (f[3][0, 1 : ny - 1] + f[6][0, 1 : ny - 1] + f[7][0, 1 : ny - 1]))
+    u[0, 1:ny - 1] = 4 * u0 / (L * L) * (y_phys * L - y_phys * y_phys)
+    v[0, 1:ny - 1] = 0
+    rho[0, 1:ny - 1] = 1 / (1 - u[0, 1:ny - 1]) * (
+        f[0][0, 1:ny - 1] + f[2][0, 1:ny - 1] + f[4][0, 1:ny - 1] + 2 *
+        (f[3][0, 1:ny - 1] + f[6][0, 1:ny - 1] + f[7][0, 1:ny - 1]))
 
-    # outlet: onstant pressure
-    rho[nx - 1, 1 : ny - 1] = 1
-    u[nx - 1, 1 : ny - 1] = -1 + 1 / (rho[nx - 1, 1 : ny - 1]) * (
-        f[0][nx - 1, 1 : ny - 1] + f[2][nx - 1, 1 : ny - 1] + f[4][nx - 1, 1 : ny - 1] + 2 *
-        (f[1][nx - 1, 1 : ny - 1] + f[5][nx - 1, 1 : ny - 1] + f[8][nx - 1, 1 : ny - 1]))
-    v[nx - 1, 1 : ny - 1] = 0
+    # outlet: constant pressure
+    rho[nx - 1, 1:ny - 1] = 1
+    u[nx - 1, 1:ny - 1] = -1 + 1 / (rho[nx - 1, 1:ny - 1]) * (
+        f[0][nx - 1, 1:ny - 1] + f[2][nx - 1, 1:ny - 1] +
+        f[4][nx - 1, 1:ny - 1] + 2 *
+        (f[1][nx - 1, 1:ny - 1] + f[5][nx - 1, 1:ny - 1] +
+         f[8][nx - 1, 1:ny - 1]))
+    v[nx - 1, 1:ny - 1] = 0
 
     # inlet: Zou/He BC
-    f[1][0, 1 : ny - 1] = f[3][0, 1 : ny - 1] + 2 / 3 * rho[0, 1 : ny - 1] * u[0, 1 : ny - 1]
+    f[1][0, 1:ny -
+         1] = f[3][0, 1:ny - 1] + 2 / 3 * rho[0, 1:ny - 1] * u[0, 1:ny - 1]
     f[5][0, 1 : ny - 1] = f[7][0, 1 : ny - 1] + 1 / 2 * (f[4][0, 1 : ny - 1] - f[2][0, 1 : ny - 1]) \
                     + 1 / 2 * rho[0, 1 : ny - 1] * v[0, 1 : ny - 1] \
                     + 1 / 6 * rho[0, 1 : ny - 1] * u[0, 1 : ny - 1]
@@ -63,14 +67,17 @@ for cycle in range(nsteps):
                     + 1 / 6 * rho[0, 1 : ny - 1] * u[0, 1 : ny - 1]
 
     # outlet: Zou/He BC
-    f[3][nx - 1,
-         1 : ny - 1] = f[1][nx - 1, 1 : ny - 1] - 2 / 3 * rho[nx - 1, 1 : ny - 1] * u[nx - 1, 1 : ny - 1]
-    f[7][nx - 1, 1 : ny - 1] = f[5][nx - 1, 1 : ny - 1] + 1 / 2 * (
-        f[2][nx - 1, 1 : ny - 1] - f[4][nx - 1, 1 : ny - 1]) - 1 / 2 * rho[nx - 1, 1 : ny - 1] * v[
-            nx - 1, 1 : ny - 1] - 1 / 6 * rho[nx - 1, 1 : ny - 1] * u[nx - 1, 1 : ny - 1]
-    f[6][nx - 1, 1 : ny - 1] = f[8][nx - 1, 1 : ny - 1] + 1 / 2 * (
-        f[4][nx - 1, 1 : ny - 1] - f[2][nx - 1, 1 : ny - 1]) + 1 / 2 * rho[nx - 1, 1 : ny - 1] * v[
-            nx - 1, 1 : ny - 1] - 1 / 6 * rho[nx - 1, 1 : ny - 1] * u[nx - 1, 1 : ny - 1]
+    f[3][nx - 1, 1:ny -
+         1] = f[1][nx - 1, 1:ny -
+                   1] - 2 / 3 * rho[nx - 1, 1:ny - 1] * u[nx - 1, 1:ny - 1]
+    f[7][nx - 1, 1:ny - 1] = f[5][nx - 1, 1:ny - 1] + 1 / 2 * (
+        f[2][nx - 1, 1:ny - 1] - f[4][nx - 1, 1:ny - 1]
+    ) - 1 / 2 * rho[nx - 1, 1:ny - 1] * v[nx - 1, 1:ny - 1] - 1 / 6 * rho[
+        nx - 1, 1:ny - 1] * u[nx - 1, 1:ny - 1]
+    f[6][nx - 1, 1:ny - 1] = f[8][nx - 1, 1:ny - 1] + 1 / 2 * (
+        f[4][nx - 1, 1:ny - 1] - f[2][nx - 1, 1:ny - 1]
+    ) + 1 / 2 * rho[nx - 1, 1:ny - 1] * v[nx - 1, 1:ny - 1] - 1 / 6 * rho[
+        nx - 1, 1:ny - 1] * u[nx - 1, 1:ny - 1]
 
     # collision and bounce-back boundary condition
     for i in range(9):
@@ -82,12 +89,14 @@ for cycle in range(nsteps):
     f[5][obst], f[7][obst] = f[7][obst], f[5][obst]
     f[6][obst], f[8][obst] = f[8][obst], f[6][obst]
 
-    # Streaming step
+    # streaming step
     for i in range(9):
         f[i][:] = np.roll(f[i], (cx[i], cy[i]), (0, 1))
 
     if cycle % tPlot == 0:
-        print("%.3g %.3g %.3g" % (np.var(u), np.var(v), np.var(rho)))
+        for name, field in ["u", u], ["v", v], ["rho", rho]:
+            print("%s[min,max,var]: %.3g %.3g %.3g" %
+                  (name, np.min(rho), np.max(rho), np.variance(rho)))
         path = "cyl.%09d.raw" % cycle
         vort = np.roll(u, [0, 1], [0, 1]) - np.roll(
             u, [0, -1], [0, 1]) - np.roll(v, [1, 0], [0, 1]) + np.roll(
