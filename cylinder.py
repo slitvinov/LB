@@ -3,12 +3,12 @@ import torch as np
 
 np.set_default_device('cuda')
 
-nx = 4000
-ny = 1000
+nx = 400
+ny = 100
 x0 = nx // 5 + 1
 y0 = ny // 2 + 3
 r0 = ny // 10 + 1
-u0 = 0.1
+u0 = 1
 Re = 100
 nu = u0 * 2. * r0 / Re
 omega = 1. / (3 * nu + 1. / 2.)
