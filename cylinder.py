@@ -29,6 +29,7 @@ rho0 = 1
 rho = np.full((nx, ny), rho0, dtype=np.float64)
 f = [np.empty((nx, ny)) for i in range(9)]
 f1 = [np.empty((nx, ny)) for i in range(9)]
+feq = np.empty((nx, ny))
 
 for i in range(9):
     c = 3 * (cx[i] * u + cy[i] * v)
@@ -73,22 +74,16 @@ for cycle in range(nsteps):
         f[4][nx - 1, col] - f[2][nx - 1, col]) + 1 / 2 * rho[nx - 1, col] * v[
             nx - 1, col] - 1 / 6 * rho[nx - 1, col] * u[nx - 1, col]
 
-    feq = np.zeros_like(f)
+    # collision and bounce-back boundary condition
     for i in range(9):
         c = 3 * (cx[i] * u + cy[i] * v)
-        feq[i][:] = rho * t[i] * (1 + c + 1 / 2 * (c * c) - 3 / 2 *
-                                  (u**2 + v**2))
-    # Collision step
-    for i in range(9):
-        f1[i][:] = f[i] * (1 - omega) + omega * feq[i]
-
-    # Bounce-back boundary condition
-    for i in range(9):
+        feq[:] = rho * t[i] * (1 + c + 1 / 2 * (c * c) - 3 / 2 * (u**2 + v**2))
+        f1[i][:] = f[i] * (1 - omega) + omega * feq
         f1[i][bb[0], bb[1]] = f[opp[i]][bb[0], bb[1]]
-
     # Streaming step
     for i in range(9):
         f[i][:] = np.roll(f1[i], (cx[i], cy[i]), axis=(0, 1))
+
     if cycle % tPlot == 0:
         print("%.3g %.3g %.3g" % (np.var(u), np.var(v), np.var(rho)))
         path = "cyl.%09d.raw" % cycle
