@@ -7,9 +7,9 @@ ny = 1000
 x0 = nx // 5 + 1
 y0 = ny // 2 + 3
 r0 = ny // 10 + 1
-uMax = 0.1
+u0 = 1.0
 Re = 100
-nu = uMax * 2. * r0 / Re
+nu = u0 * 2. * r0 / Re
 omega = 1. / (3 * nu + 1. / 2.)
 nsteps = 400000
 tPlot = 1000
@@ -40,7 +40,7 @@ for cycle in range(nsteps):
     # inlet:
     col = np.arange(1, ny - 1)
     y_phys = col - 0.5
-    u[0, 1 : ny - 1] = 4 * uMax / (L * L) * (y_phys * L - y_phys * y_phys)
+    u[0, 1 : ny - 1] = 4 * u0 / (L * L) * (y_phys * L - y_phys * y_phys)
     v[0, 1 : ny - 1] = 0
     rho[0, 1 : ny - 1] = 1 / (
         1 - u[0, 1 : ny - 1]) * (f[0][0, 1 : ny - 1] + f[2][0, 1 : ny - 1] + f[4][0, 1 : ny - 1] + 2 *
@@ -97,5 +97,4 @@ for cycle in range(nsteps):
                 field[obst] = np.nan
                 if hasattr(field, "numpy"):
                     field = field.cpu().detach().numpy()
-                print(field.dtype, field.shape)
                 fid.write(field.tobytes("F"))
