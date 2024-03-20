@@ -22,6 +22,7 @@ obst = (x - x0)**2 + (y - y0)**2 <= r0**2
 obst[:, 0] = 1
 obst[:, ny - 1] = 1
 xb, yb = np.where(obst)
+xd, yd = np.where(~obst)
 L = ny - 2
 u = np.zeros((nx, ny))
 v = np.zeros((nx, ny))
@@ -78,8 +79,11 @@ for cycle in range(nsteps):
     for i in range(9):
         c = 3 * (cx[i] * u + cy[i] * v)
         feq[:] = rho * t[i] * (1 + c + 1 / 2 * (c * c) - 3 / 2 * (u**2 + v**2))
-        f1[i][:] = f[i] * (1 - omega) + omega * feq
+        f1[i][xd, yd] = f[i][xd, yd] * (1 - omega) + omega * feq[xd, yd]
+
+    for i in range(9):
         f1[i][xb, yb] = f[opp[i]][xb, yb]
+
     # Streaming step
     for i in range(9):
         f[i][:] = np.roll(f1[i], (cx[i], cy[i]), axis=(0, 1))
