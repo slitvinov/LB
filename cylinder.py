@@ -97,4 +97,5 @@ for cycle in range(nsteps):
                 field[obst] = np.nan
                 if hasattr(field, "numpy"):
                     field = field.cpu().detach().numpy()
+                print(field.dtype, field.shape)
                 fid.write(field.tobytes("F"))
