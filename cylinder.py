@@ -2,8 +2,8 @@ import torch as np
 if np.cuda.is_available():
     np.set_default_device("cuda")
 
-nx = 6400
-ny = 1600
+nx = 12800
+ny = 3200
 nsteps = 400000
 nplot = 1000
 x0 = nx // 5
