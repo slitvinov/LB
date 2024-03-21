@@ -2,15 +2,15 @@ import torch as np
 if np.cuda.is_available():
     np.set_default_device("cuda")
 
-nx = 12800
-ny = 3200
+nx = 400
+ny = 100
 nsteps = 400000
 nplot = 5000
 x0 = nx // 5
 y0 = ny // 2
 r0 = ny // 20
 u0 = 0.1
-Re = 1000
+Re = 100
 nu = u0 * 2. * r0 / Re
 omega = 1. / (3 * nu + 1. / 2.)
 t = 4 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 36, 1 / 36, 1 / 36, 1 / 36
@@ -28,6 +28,8 @@ rho = np.full((nx, ny), rho0, dtype=np.float64)
 f = [np.empty((nx, ny), dtype=np.float64) for i in range(9)]
 feq = np.empty((nx, ny), dtype=np.float64)
 c = np.empty((nx, ny), dtype=np.float64)
+col = np.arange(1, ny - 1)
+y_phys = col - 0.5
 
 for i in range(9):
     c[:] = 3 * (cx[i] * u + cy[i] * v)
@@ -39,8 +41,6 @@ for istep in range(nsteps):
     v[:] = (f[5] + f[2] + f[6] - f[7] - f[4] - f[8]) / rho
 
     # inlet:
-    col = np.arange(1, ny - 1)
-    y_phys = col - 0.5
     u[0, 1:ny - 1] = 4 * u0 / (L * L) * (y_phys * L - y_phys * y_phys)
     v[0, 1:ny - 1] = 0
     rho[0, 1:ny - 1] = 1 / (1 - u[0, 1:ny - 1]) * (
