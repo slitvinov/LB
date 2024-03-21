@@ -1,10 +1,11 @@
-# import numpy as np
 import torch as np
-
-np.set_default_device('cuda')
+if np.cuda.is_available():
+    np.set_default_device("cuda")
 
 nx = 800
 ny = 200
+nsteps = 400000
+nplot = 250
 x0 = nx // 5 + 1
 y0 = ny // 2 + 3
 r0 = ny // 10 + 1
@@ -12,8 +13,6 @@ u0 = 0.1
 Re = 100
 nu = u0 * 2. * r0 / Re
 omega = 1. / (3 * nu + 1. / 2.)
-nsteps = 400000
-tPlot = 250
 t = 4 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 36, 1 / 36, 1 / 36, 1 / 36
 cx = 0, 1, 0, -1, 0, 1, -1, -1, 1
 cy = 0, 0, 1, 0, -1, 1, 1, -1, -1
@@ -34,7 +33,7 @@ for i in range(9):
     c[:] = 3 * (cx[i] * u + cy[i] * v)
     f[i][:] = rho0 * t[i] * (1 + c + 1 / 2 * (c * c) - 3 / 2 * (u**2 + v**2))
 
-for cycle in range(nsteps):
+for istep in range(nsteps):
     rho[:] = f[0] + f[1] + f[2] + f[3] + f[4] + f[5] + f[6] + f[7] + f[8]
     u[:] = (f[1] - f[3] + f[5] - f[6] - f[7] + f[8]) / rho
     v[:] = (f[5] + f[2] + f[6] - f[7] - f[4] - f[8]) / rho
@@ -60,12 +59,12 @@ for cycle in range(nsteps):
     # inlet: Zou/He BC
     f[1][0, 1:ny -
          1] = f[3][0, 1:ny - 1] + 2 / 3 * rho[0, 1:ny - 1] * u[0, 1:ny - 1]
-    f[5][0, 1 : ny - 1] = f[7][0, 1 : ny - 1] + 1 / 2 * (f[4][0, 1 : ny - 1] - f[2][0, 1 : ny - 1]) \
-                    + 1 / 2 * rho[0, 1 : ny - 1] * v[0, 1 : ny - 1] \
-                    + 1 / 6 * rho[0, 1 : ny - 1] * u[0, 1 : ny - 1]
-    f[8][0, 1 : ny - 1] = f[6][0, 1 : ny - 1] + 1 / 2 * (f[2][0, 1 : ny - 1] - f[4][0, 1 : ny - 1]) \
-                    - 1 / 2 * rho[0, 1 : ny - 1] * v[0, 1 : ny - 1] \
-                    + 1 / 6 * rho[0, 1 : ny - 1] * u[0, 1 : ny - 1]
+    f[5][0, 1:ny - 1] = f[7][0, 1:ny - 1] + 1 / 2 * (
+        f[4][0, 1:ny - 1] - f[2][0, 1:ny - 1]) + 1 / 2 * rho[0, 1:ny - 1] * v[
+            0, 1:ny - 1] + 1 / 6 * rho[0, 1:ny - 1] * u[0, 1:ny - 1]
+    f[8][0, 1:ny - 1] = f[6][0, 1:ny - 1] + 1 / 2 * (
+        f[2][0, 1:ny - 1] - f[4][0, 1:ny - 1]) - 1 / 2 * rho[0, 1:ny - 1] * v[
+            0, 1:ny - 1] + 1 / 6 * rho[0, 1:ny - 1] * u[0, 1:ny - 1]
 
     # outlet: Zou/He BC
     f[3][nx - 1, 1:ny -
@@ -94,17 +93,17 @@ for cycle in range(nsteps):
     for i in range(9):
         f[i][:] = np.roll(f[i], (cx[i], cy[i]), (0, 1))
 
-    if cycle % tPlot == 0:
-        path = "cyl.%09d.raw" % cycle
+    if istep % nplot == 0:
+        path = "cyl.%09d.raw" % istep
         print("cylinder.py: %s" % path)
-        for name, field in ["u", u], ["v", v], ["rho", rho]:
+        vort = np.roll(u, [0, 1], [0, 1]) - np.roll(
+            u, [0, -1], [0, 1]) - np.roll(v, [1, 0], [0, 1]) + np.roll(
+                v, [-1, 0], [0, 1])
+        for name, field in ["u", u], ["v", v], ["rho", rho], ["vort", vort]:
             print(
                 "cylinder.py: %10s: mean,min,max,std: %+.3e %+.3e %+.3e %+.3e"
                 % (name, np.mean(field), np.min(field), np.max(field),
                    np.std(field)))
-        vort = np.roll(u, [0, 1], [0, 1]) - np.roll(
-            u, [0, -1], [0, 1]) - np.roll(v, [1, 0], [0, 1]) + np.roll(
-                v, [-1, 0], [0, 1])
         with open(path, "wb") as fid:
             for field in [u, v, rho, vort]:
                 field[obst] = np.nan
