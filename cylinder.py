@@ -2,13 +2,13 @@ import torch as np
 if np.cuda.is_available():
     np.set_default_device("cuda")
 
-nx = 800
-ny = 200
+nx = 1600
+ny = 400
 nsteps = 400000
 nplot = 250
-x0 = nx // 5 + 1
-y0 = ny // 2 + 3
-r0 = ny // 10 + 1
+x0 = nx // 5
+y0 = ny // 2
+r0 = ny // 20
 u0 = 0.1
 Re = 100
 nu = u0 * 2. * r0 / Re
