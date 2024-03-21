@@ -17,7 +17,7 @@ c     mixed boundary conditions c(Poiseuille flow)
          call equil
          call colli
          if(iforce) then
-            call force(istep, frce)
+            call force()
          endif
 c     Obstacle ?
          if(iobst.eq.1) call obst
@@ -102,7 +102,6 @@ c     Applied force(based on Stokes problem)
 c     # of biased populations
       fpois = rho0 * fpois / 6.
       print *, 'Intensity of the applied force', fpois
-      return
       end
 
       subroutine Inithydro
@@ -116,7 +115,6 @@ c     # of biased populations
             v(i,j)   = v0
          enddo
       enddo
-      return
       end
 
       subroutine Initpop
@@ -134,7 +132,6 @@ c     random amplitude
             end do
          end do
       end do
-      return
       end
 
       subroutine Move
@@ -164,7 +161,6 @@ c     random amplitude
             f(7, i, j) = f(7, i + 1, j + 1)
          enddo
       enddo
-      return
       end
 
       subroutine Hydrovar
@@ -184,7 +180,6 @@ c     hydro variables
          enddo
       enddo
 
-      return
       end
 
       subroutine Equil
@@ -215,8 +210,6 @@ c     equils are written explicitly to avoid multplications by zero
             feq(8, i, j) = w2 *(1.0d0 + sumsq2 + ul - vl - uv)
          enddo
       enddo
-
-      return
       end
 
       subroutine Colli
@@ -230,27 +223,22 @@ c     equils are written explicitly to avoid multplications by zero
             enddo
          enddo
       enddo
-
-      return
       end
 
-      subroutine Force(it, frce)
+      subroutine Force()
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
-      frce = fpois
       do j = 1, ny
          do i = 1, nx
-            f(1, i, j) = f(1, i, j) + frce
-            f(5, i, j) = f(5, i, j) + frce
-            f(8, i, j) = f(8, i, j) + frce
+            f(1, i, j) = f(1, i, j) + fpois
+            f(5, i, j) = f(5, i, j) + fpois
+            f(8, i, j) = f(8, i, j) + fpois
 
-            f(3, i, j) = f(3, i, j) - frce
-            f(6, i, j) = f(6, i, j) - frce
-            f(7, i, j) = f(7, i, j) - frce
+            f(3, i, j) = f(3, i, j) - fpois
+            f(6, i, j) = f(6, i, j) - fpois
+            f(7, i, j) = f(7, i, j) - fpois
          enddo
       enddo
-
-      return
       end
 
       subroutine Pbc
@@ -280,8 +268,6 @@ c     SOUTH
          f(7, i, ny+1) = f(7, i, 1)
          f(8, i, ny+1) = f(8, i, 1)
       enddo
-
-      return
       end
       subroutine Mbc
       implicit double precision(a-h, o-z)
@@ -315,8 +301,6 @@ c     corners bounce-back
       f(5, 0, 0) = f(7, 1, 1)
       f(7, nx + 1, ny + 1) = f(5, nx, ny)
       f(6, nx + 1, 0) = f(8, nx, 1)
-
-      return
       end
 
       subroutine Obst
@@ -339,8 +323,6 @@ c     top
 c     bot
       f(4, i, jbot)= f(2, i, jbot - 1)
       f(7, i, jbot)= f(5, i - 1, jbot - 1)
-
-      return
       end
 
       subroutine Movie(it)
@@ -405,7 +387,6 @@ c----------------------------------------------------------
       write(77, '(A)') '  </Domain>'
       write(77, '(A)') '</Xdmf>'
       close(77)
-      return
  101  write (*, '(''bgk2: error: fail to write output'')')
       stop 1
       end
@@ -437,7 +418,6 @@ c----------------------------------------------------------
 
       print *, 'diagnostic 0D : istep density umoy and vmoy ',
      $     istep, densit, umoy, vmoy
-      return
       end
 
       subroutine Config(istep, iconf)
@@ -453,5 +433,4 @@ c----------------------------------------------------------
          write( iout, '( bn) ')
       enddo
       write(6, *) 'configuration at time and file >>', istep, iout
-      return
       end
