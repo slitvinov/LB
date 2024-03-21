@@ -1,18 +1,22 @@
-import matplotlib.pyplot as plt
+import math
 import matplotlib
 import matplotlib.animation
-import sys
+import matplotlib.pyplot as plt
 import numpy as np
-
+import os
+import sys
 
 def update(path):
-    dtype = np.float64
-    u, v, rho, vort = np.memmap(path, dtype=dtype, shape=(4, nx, ny))
+    size = os.path.getsize(path)
+    ny = math.isqrt(size // dtype.itemsize // nfields // 2)
+    nx = 2 * ny
+    print(path, nx, ny)
+    u, v, rho, vort = np.memmap(path, dtype=dtype, shape=(4, ny, nx))
     plt.imshow(u, matplotlib.cm.jet)
     plt.tight_layout()
 
-
-nx, ny = 64, 128
+dtype = np.dtype("float64")
+nfields = 4
 plt.axis("off")
 plt.axis("equal")
 ani = matplotlib.animation.FuncAnimation(fig=plt.gcf(),

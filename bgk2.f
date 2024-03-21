@@ -113,12 +113,10 @@ c     # of biased populations
       subroutine initpop
       implicit double precision(a- h, o-z)
       include 'bgk2.par'
-      ramp = 0.01
       do j = 0, ny+1
          do i = 0, nx+1
             do ip = 0, npop - 1
-               rr = 2.* rand(iseed) - 1.
-               f(ip ,i,j) =(1. + ramp * rr)* rho0 / float(npop)
+               f(ip, i, j) = feq(ip, i, j)
                iseed = iseed + 1
             end do
          end do
