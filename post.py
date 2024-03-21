@@ -1,5 +1,4 @@
 import math
-import matplotlib
 import matplotlib.animation
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,7 +9,6 @@ def update(path):
     size = os.path.getsize(path)
     ny = math.isqrt(size // dtype.itemsize // nfields // 2)
     nx = 2 * ny
-    print(path, nx, ny)
     u, v, rho, vort = np.memmap(path, dtype=dtype, shape=(4, ny, nx))
     plt.imshow(u, matplotlib.cm.jet)
     plt.tight_layout()
