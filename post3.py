@@ -14,7 +14,7 @@ for path in sys.argv[1:]:
     ny = math.isqrt(size // dtype.itemsize // nfields // 4)
     nx = 4 * ny
     u, v, rho, vort = np.memmap(path, dtype=dtype, shape=(nfields, ny, nx))
-    plt.figure(figsize=(10, 6), dpi=100, frameon=False)
+    plt.figure(figsize=(10, 6), dpi=200, frameon=False)
     plt.axis("off")
     plt.axis("equal")
     plt.tight_layout()
