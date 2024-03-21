@@ -387,8 +387,8 @@ c----------------------------------------------------------
       write(77, '(A)') '  </Domain>'
       write(77, '(A)') '</Xdmf>'
       close(77)
+      return
  101  write (*, '(''bgk2: error: fail to write output'')')
-      stop 1
       end
 
       subroutine Diag0D(istep)
