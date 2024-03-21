@@ -8,9 +8,6 @@ c     0= rest particles, 1-4, nearest-neigh(nn), 5-8(nnn)
       call initpop
       iconf=0
       do 10 istep = 1,nsteps
-c     periodic boundary conditions
-css   call pbc
-c     mixed boundary conditions c(Poiseuille flow)
          call mbc
          call move
          call hydrovar
@@ -19,17 +16,13 @@ c     mixed boundary conditions c(Poiseuille flow)
          if(iforce) then
             call force()
          endif
-c     Obstacle ?
          if(iobst.eq.1) call obst
-c     0 - dim diagnostic
          if(mod(istep,ndiag) .eq. 0) then
             call diag0D(istep)
          endif
-c     movie
          if(mod(istep, 100) .eq. 0) then
             call movie(istep)
          endif
-c     2d configs
          if(mod(istep, nout) .eq. 0) then
             call config(istep, iconf)
             iconf=iconf+1
@@ -37,7 +30,7 @@ c     2d configs
  10   continue
       end
 
-      subroutine Input
+      subroutine input
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
       print *, 'Number of steps'
@@ -104,7 +97,7 @@ c     # of biased populations
       print *, 'Intensity of the applied force', fpois
       end
 
-      subroutine Inithydro
+      subroutine inithydro
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
       write(6, *) 'u0', u0
@@ -117,11 +110,9 @@ c     # of biased populations
       enddo
       end
 
-      subroutine Initpop
+      subroutine initpop
       implicit double precision(a- h, o-z)
       include 'bgk2.par'
-      iseed = 15391
-c     random amplitude
       ramp = 0.01
       do j = 0, ny+1
          do i = 0, nx+1
@@ -134,7 +125,7 @@ c     random amplitude
       end do
       end
 
-      subroutine Move
+      subroutine move
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
       do j = ny, 1, -1
@@ -163,7 +154,7 @@ c     random amplitude
       enddo
       end
 
-      subroutine Hydrovar
+      subroutine hydrovar
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
 c     hydro variables
@@ -182,7 +173,7 @@ c     hydro variables
 
       end
 
-      subroutine Equil
+      subroutine equil
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
 c     equils are written explicitly to avoid multplications by zero
@@ -212,7 +203,7 @@ c     equils are written explicitly to avoid multplications by zero
       enddo
       end
 
-      subroutine Colli
+      subroutine colli
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
       do k = 0, npop - 1
@@ -225,7 +216,7 @@ c     equils are written explicitly to avoid multplications by zero
       enddo
       end
 
-      subroutine Force()
+      subroutine force
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
       do j = 1, ny
@@ -241,7 +232,7 @@ c     equils are written explicitly to avoid multplications by zero
       enddo
       end
 
-      subroutine Pbc
+      subroutine pbc
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
 c     EAST
@@ -269,7 +260,7 @@ c     SOUTH
          f(8, i, ny+1) = f(8, i, 1)
       enddo
       end
-      subroutine Mbc
+      subroutine mbc
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
 c     WEST inlet
@@ -303,7 +294,7 @@ c     corners bounce-back
       f(6, nx + 1, 0) = f(8, nx, 1)
       end
 
-      subroutine Obst
+      subroutine obst
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
       i         = nx / 4
@@ -325,7 +316,7 @@ c     bot
       f(7, i, jbot)= f(5, i - 1, jbot - 1)
       end
 
-      subroutine Movie(it)
+      subroutine movie(it)
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
 c----------------------------------------------------------
@@ -391,7 +382,7 @@ c----------------------------------------------------------
  101  write (*, '(''bgk2: error: fail to write output'')')
       end
 
-      subroutine Diag0D(istep)
+      subroutine diag0d(istep)
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
       densit= 0.0d0
@@ -420,7 +411,7 @@ c----------------------------------------------------------
      $     istep, densit, umoy, vmoy
       end
 
-      subroutine Config(istep, iconf)
+      subroutine config(istep, iconf)
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
       iout = 60 + iconf
