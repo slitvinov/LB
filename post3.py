@@ -18,7 +18,7 @@ for path in sys.argv[1:]:
     plt.axis("off")
     plt.axis("equal")
     plt.tight_layout()
-    plt.imshow(vort, matplotlib.cm.jet, vmin=-0.01, vmax=0.01)
+    plt.imshow(vort, matplotlib.cm.jet, vmin=-0.001, vmax=0.001)
     png = re.sub("\.raw$", "", path) + ".png"
     print(png)
     plt.savefig(png, bbox_inches=0)
