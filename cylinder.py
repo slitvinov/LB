@@ -5,7 +5,7 @@ if np.cuda.is_available():
 nx = 12800
 ny = 3200
 nsteps = 400000
-nplot = 1000
+nplot = 5000
 x0 = nx // 5
 y0 = ny // 2
 r0 = ny // 20
