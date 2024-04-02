@@ -52,14 +52,14 @@ for istep in range(nsteps):
     u[:] = (f[1] - f[3] + f[5] - f[6] - f[7] + f[8]) / rho
     v[:] = (f[5] + f[2] + f[6] - f[7] - f[4] - f[8]) / rho
 
-    force = 1e-6
-    f[1] += force
-    f[5] += force
-    f[8] += force
+    force = 1e-5
+    f[1][1:nx+1,1:ny+1] += force
+    f[5][1:nx+1,1:ny+1] += force
+    f[8][1:nx+1,1:ny+1] += force
     
-    f[3] -= force
-    f[6] -= force
-    f[7] -= force
+    f[3][1:nx+1,1:ny+1] -= force
+    f[6][1:nx+1,1:ny+1] -= force
+    f[7][1:nx+1,1:ny+1] -= force
 
 
     # collision and bounce-back boundary condition
