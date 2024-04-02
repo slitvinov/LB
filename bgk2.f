@@ -2,26 +2,6 @@ c     D2Q9 lattice, BGK version
 c     0= rest particles, 1-4, nearest-neigh(nn), 5-8(nnn)
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
-      call input
-      call inithydro
-      call equil
-      call initpop
-      do 10 istep = 1,nsteps
-         call mbc
-         call move
-         call hydrovar
-         call equil
-         call colli
-         if(iforce) call force
-         if(iobst.eq.1) call obst
-         if(mod(istep,ndiag) .eq. 0) call diag(istep)
-         if(mod(istep, 100) .eq. 0) call movie(istep)
- 10   continue
-      end
-
-      subroutine input
-      implicit double precision(a-h, o-z)
-      include 'bgk2.par'
       print *, 'Number of steps'
       read(5 ,*) nsteps
       print *, 'Number of steps between printing profile'
@@ -68,31 +48,36 @@ c     Applied force(based on Stokes problem)
 c     # of biased populations
       fpois = rho0 * fpois / 6.
       print *, 'Intensity of the applied force', fpois
-      end
 
-      subroutine inithydro
-      implicit double precision(a-h, o-z)
-      include 'bgk2.par'
-      do 10 j = 0, ny+1
-         do 20 i = 0, nx+1
+      do 110 j = 0, ny+1
+         do 120 i = 0, nx+1
             rho(i,j) = rho0
             u(i,j)   = u0
             v(i,j)   = v0
- 20      continue
- 10   continue
-      end
+ 120      continue
+ 110   continue
 
-      subroutine initpop
-      implicit double precision(a- h, o-z)
-      include 'bgk2.par'
+       call equil
+
       do 10 j = 0, ny+1
          do 20 i = 0, nx+1
             do 30 ip = 0, npop - 1
                f(ip, i, j) = feq(ip, i, j)
-               iseed = iseed + 1
  30         continue
  20      continue
  10   continue
+
+      do 210 istep = 1,nsteps
+         call mbc
+         call move
+         call hydrovar
+         call equil
+         call colli
+         if(iforce) call force
+         if(iobst.eq.1) call obst
+         if(mod(istep,ndiag) .eq. 0) call diag(istep)
+         if(mod(istep, 100) .eq. 0) call movie(istep)
+ 210   continue
       end
 
       subroutine move
