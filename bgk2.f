@@ -2,72 +2,45 @@ c     D2Q9 lattice, BGK version
 c     0= rest particles, 1-4, nearest-neigh(nn), 5-8(nnn)
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
-      print *, 'Number of steps'
       read(5 ,*) nsteps
-      print *, 'Number of steps between printing profile'
       read(5, *) nout
-      print *, 'Number of steps between performing diagnostics'
       read(5 ,*) ndiag
-      print *, 'Relaxation frequency omega'
       read(5, *) omega
-      print *, 'Applied force(T or F)) ?'
       read(5 ,*) iforce
-      print *, 'Initial density and velocity for the Poiseuille force'
       read(5, *) rho0, u0, v0
-      print *, 'Final velocity for the Poise force'
       read(5 ,*) uf
-      print *, 'Linear obstacle(T or F)?'
       read(5 ,*) iobst
-      print *, 'Obstacle height?'
       read(5 ,*) nobst
-      print *, 'Obstacle id', iobst
-      print *, 'Length of the obstacle(multple of 2)', nobst
-      print *, 'Number of cells :' , nx, '*', ny
-      print *, 'Nsteps : ', nsteps
-      print *, 'Relaxation frequency :', omega
-      print *, 'Initial velocity for this Poiseuille force :', u0
-      print *, 'Initial density :', rho0
-      print *, 'Applied force :', iforce
-      if(iobst.eq.1) print *, 'Linear Obstacle with length :', nobst
-c     lattice weights
       w0 = 4.0d0/9.0d0
       w1 = 1.0/9.0d0
       w2 = 1.0/36.0d0
-c     sound - speed and related constants
       cs2 = 1.0d0 / 3.0d0
       cs22 = 2.0d0 * cs2
       cssq = 2.0d0 / 9.0d0
-c     viscosity and nominal Reynolds
       visc =(1.0d0 / omega - 0.5d0) * cs2
       rey = u0*ny / visc
       print *, 'Viscosity and nominal Reynolds:', visc, rey
       if(visc .lt. 0) stop 'OMEGA OUT of(0, 2) interval!!'
-
 c     Applied force(based on Stokes problem)
       fpois = 8.0d0 * visc * uf / dfloat(ny) / dfloat(ny)
 c     # of biased populations
       fpois = rho0 * fpois / 6.
-      print *, 'Intensity of the applied force', fpois
-
-      do 110 j = 0, ny+1
-         do 120 i = 0, nx+1
+      do j = 0, ny+1
+         do i = 0, nx+1
             rho(i,j) = rho0
             u(i,j)   = u0
             v(i,j)   = v0
- 120      continue
- 110   continue
-
-       call equil
-
-      do 10 j = 0, ny+1
-         do 20 i = 0, nx+1
-            do 30 ip = 0, npop - 1
+         enddo
+      enddo
+      call equil
+      do j = 0, ny+1
+         do i = 0, nx+1
+            do ip = 0, npop - 1
                f(ip, i, j) = feq(ip, i, j)
- 30         continue
- 20      continue
- 10   continue
-
-      do 210 istep = 1,nsteps
+            enddo
+         enddo
+      enddo
+      do istep = 1,nsteps
          call mbc
          call move
          call hydrovar
@@ -77,44 +50,44 @@ c     # of biased populations
          if(iobst.eq.1) call obst
          if(mod(istep,ndiag) .eq. 0) call diag(istep)
          if(mod(istep, 100) .eq. 0) call movie(istep)
- 210   continue
+      enddo
       end
 
       subroutine move
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
-      do 110 j = ny, 1, -1
-         do 120 i = 1, nx
+      do j = ny, 1, -1
+         do i = 1, nx
             f(2, i, j) = f(2, i, j - 1)
             f(6, i, j) = f(6, i + 1, j -1)
- 120     continue
- 110  continue
-      do 210 j = ny,1,-1
-         do 220 i = nx, 1, -1
+         enddo
+      enddo
+      do j = ny,1,-1
+         do i = nx, 1, -1
             f(1,i,j) = f(1, i - 1, j)
             f(5,i,j) = f(5, i - 1, j - 1)
- 220     continue
- 210  continue
-      do 310 j = 1, ny
-         do 320 i = nx, 1, -1
+         enddo
+      enddo
+      do j = 1, ny
+         do i = nx, 1, -1
             f(4, i, j) = f(4, i, j + 1)
             f(8, i, j) = f(8, i - 1, j +1)
- 320     continue
- 310  continue
-      do 410 j = 1, ny
-         do 420 i = 1, nx
+         enddo
+      enddo
+      do j = 1, ny
+         do i = 1, nx
             f(3, i, j) = f(3, i + 1, j)
             f(7, i, j) = f(7, i + 1, j + 1)
- 420     continue
- 410  continue
+         enddo
+      enddo
       end
 
       subroutine hydrovar
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
 c     hydro variables
-      do 10 j = 1, ny
-         do 20 i = 1, nx
+      do j = 1, ny
+         do i = 1, nx
             rho(i,j)= f(1, i, j) + f(2, i, j) + f(3, i, j)
      $           + f(4, i, j) + f(5, i, j) + f(6, i, j)
      $           + f(7, i, j) + f(8, i, j) + f(0, i, j)
@@ -123,8 +96,8 @@ c     hydro variables
      $           f(6, i, j) - f(7, i, j) + f(8, i, j)) * rhoi
             v(i, j) =(f(5, i, j) + f(2, i, j)+ f(6, i, j)
      $           - f(7, i, j) - f(4, i, j) - f(8, i, j)) * rhoi
- 20      continue
- 10   continue
+         enddo
+      enddo
       end
 
       subroutine equil
@@ -214,6 +187,7 @@ c     SOUTH
          f(8, i, ny+1) = f(8, i, 1)
       enddo
       end
+
       subroutine mbc
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
@@ -262,79 +236,10 @@ c     corners bounce-back
          f(7 ,i,j) = f(5, i - 1, j)
          f(6 ,i,j) = f(8, i - 1, j)
       enddo
-c     top
       f(2, i, jtop)= f(4, i, jtop + 1)
       f(6, i, jtop)= f(8, i - 1, jtop + 1)
-c     bot
       f(4, i, jbot)= f(2, i, jbot - 1)
       f(7, i, jbot)= f(5, i - 1, jbot - 1)
-      end
-
-      subroutine movie(it)
-      implicit double precision(a-h, o-z)
-      include 'bgk2.par'
-c----------------------------------------------------------
-      character raw*(2 + 8 + 4)
-      character xdmf*(2 + 8 + 6)
-      parameter(nf = 4)
-      character fields(nf)*4
-      data fields /'u', 'v', 'rho', 'vort'/
-      intrinsic trim
-
-      write(raw, '(A, I8.8, A)') 'p.', it, '.raw'
-      open(77, file = raw, status = 'REPLACE', form = 'UNFORMATTED',
-     $     err = 101, access = 'DIRECT',
-     $     recl = nf * 8 * nx * ny)
-      write(77, rec = 1) u(1:nx, 1:ny), v(1:nx, 1:ny),
-     $     rho(1:nx, 1:ny),
-     $     ((u(i, j + 1) - u(i, j - 1) - v(i + 1, j) + v(i - 1, j),
-     $     i = 1, nx), j = 1, ny)
-      close(77)
-
-      write(xdmf, '(A, I8.8, A)') 'p.', it, '.xdmf2'
-      open (77, file=xdmf, status='REPLACE')
-      write(77, '(A)') '<Xdmf>'
-      write(77, '(A)') '  <Domain>'
-      write(77, '(A)') '    <Grid>'
-      write(77, '(A)') '      <Topology'
-      write(77, '(A)') '	  TopologyType="2DCoRectMesh"'
-      write(77, '(    ''          Dimensions="'', I8, I8, ''"/>'')')
-     $     ny + 1, nx + 1
-      write(77, '(A)') '      <Geometry'
-      write(77, '(A)') '	  GeometryType="ORIGIN_DXDY">'
-      write(77, '(A)') '	<DataItem'
-      write(77, '(A)') '	    Dimensions="2">'
-      write(77, '(A)') '	  0'
-      write(77, '(A)') '	  0'
-      write(77, '(A)') '	</DataItem>'
-      write(77, '(A)') '	<DataItem'
-      write(77, '(A)') '	    Dimensions="2">'
-      write(77, '(A)') '	  1'
-      write(77, '(A)') '	  1'
-      write(77, '(A)') '	</DataItem>'
-      write(77, '(A)') '      </Geometry>'
-      do 100 i = 1, nf
-         write(77, '(A)') '      <Attribute'
-         write(77, '(A)') '	  Center="Cell"'
-         write(77, '(    ''       Name="'', A, ''">'')') trim(fields(i))
-         write(77, '(A)') '	<DataItem'
-         write(77, '(A)') '            Format="Binary"'
-         write(77, '(A)') '            Precision="8"'
-         write(77, '(    ''            Seek="'', I8, ''"'')')
-     $        (i - 1) * 8 * ny * nx
-         write(77, '(    ''            Dimensions="'', I8, I8, ''">'')')
-     $        ny, nx
-         write(77, '(    ''          '', A)') raw
-         write(77, '(A)') '	</DataItem>'
-         write(77, '(A)') '      </Attribute>	'
- 100  continue
-      write(77, '(A)') '    </Grid>'
-      write(77, '(A)') '  </Domain>'
-      write(77, '(A)') '</Xdmf>'
-      close(77)
-      return
- 101  write (*, '(''bgk2: error: fail to write output'')')
-      stop 1
       end
 
       subroutine diag(istep)
@@ -358,10 +263,9 @@ c----------------------------------------------------------
             vmoy = vmoy + v(i,j)
          enddo
       enddo
-
       umoy = umoy / dfloat( nx*ny)
       vmoy = vmoy / dfloat( nx*ny)
-
-      print *, 'diagnostic 0D : istep density umoy and vmoy ',
+      print *, 'diag: istep density umoy and vmoy ',
      $     istep, densit, umoy, vmoy
       end
+
