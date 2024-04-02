@@ -85,13 +85,13 @@ c     0= rest particles, 1-4, nearest-neigh(nn), 5-8(nnn)
 c     hydro variables
       do j = 1, ny
          do i = 1, nx
-            rho(i,j)= f(1, i, j) + f(2, i, j) + f(3, i, j)
-     $           + f(4, i, j) + f(5, i, j) + f(6, i, j)
-     $           + f(7, i, j) + f(8, i, j) + f(0, i, j)
+            rho(i, j) = f(0, i, j) + f(1, i, j) + f(2, i, j) +
+     $           f(3, i, j) + f(4, i, j) + f(5, i, j) + f(6, i, j) +
+     $           f(7, i, j) + f(8, i, j)
             rhoi = 1. / rho(i, j)
-            u(i, j) =(f(1, i, j) - f(3, i, j) + f(5, i, j) -
+            u(i, j) = (f(1, i, j) - f(3, i, j) + f(5, i, j) -
      $           f(6, i, j) - f(7, i, j) + f(8, i, j)) * rhoi
-            v(i, j) =(f(5, i, j) + f(2, i, j)+ f(6, i, j)
+            v(i, j) = (f(5, i, j) + f(2, i, j)+ f(6, i, j)
      $           - f(7, i, j) - f(4, i, j) - f(8, i, j)) * rhoi
          enddo
       enddo
@@ -100,7 +100,6 @@ c     hydro variables
       subroutine equil
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
-c     equils are written explicitly to avoid multplications by zero
       do j = 0, ny + 1
          do i = 0, nx + 1
             ul = u(i, j) / cs2
