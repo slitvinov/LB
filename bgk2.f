@@ -6,27 +6,16 @@ c     0= rest particles, 1-4, nearest-neigh(nn), 5-8(nnn)
       call inithydro
       call equil
       call initpop
-      iconf=0
       do 10 istep = 1,nsteps
          call mbc
          call move
          call hydrovar
          call equil
          call colli
-         if(iforce) then
-            call force()
-         endif
+         if(iforce) call force
          if(iobst.eq.1) call obst
-         if(mod(istep,ndiag) .eq. 0) then
-            call diag0D(istep)
-         endif
-         if(mod(istep, 100) .eq. 0) then
-            call movie(istep)
-         endif
-         if(mod(istep, nout) .eq. 0) then
-            call config(istep, iconf)
-            iconf=iconf+1
-         endif
+         if(mod(istep,ndiag) .eq. 0) call diag(istep)
+         if(mod(istep, 100) .eq. 0) call movie(istep)
  10   continue
       end
 
@@ -53,19 +42,13 @@ c     0= rest particles, 1-4, nearest-neigh(nn), 5-8(nnn)
       read(5 ,*) nobst
       print *, 'Obstacle id', iobst
       print *, 'Length of the obstacle(multple of 2)', nobst
-
-      print * ,'*****************************************'
-      print *, 'Lattice BGK model, 2D with 9 velocities'
-      print * ,'*****************************************'
       print *, 'Number of cells :' , nx, '*', ny
       print *, 'Nsteps : ', nsteps
       print *, 'Relaxation frequency :', omega
       print *, 'Initial velocity for this Poiseuille force :', u0
       print *, 'Initial density :', rho0
       print *, 'Applied force :', iforce
-      if(iobst.eq.1) then
-         print *, 'Linear Obstacle with length :', nobst
-      endif
+      if(iobst.eq.1) print *, 'Linear Obstacle with length :', nobst
 c     lattice weights
       w0 = 4.0d0/9.0d0
       w1 = 1.0/9.0d0
@@ -369,7 +352,7 @@ c----------------------------------------------------------
       stop 1
       end
 
-      subroutine diag0d(istep)
+      subroutine diag(istep)
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
       densit= 0.0d0
@@ -396,19 +379,4 @@ c----------------------------------------------------------
 
       print *, 'diagnostic 0D : istep density umoy and vmoy ',
      $     istep, densit, umoy, vmoy
-      end
-
-      subroutine config(istep, iconf)
-      implicit double precision(a-h, o-z)
-      include 'bgk2.par'
-      iout = 60 + iconf
-      do j = 2, ny - 1
-         do i = 2, nx - 1
-            vor = u(i, j + 1) - u(i, j - 1) -
-     $           v(i + 1, j) + v(i - 1, j)
-            write(iout, *) i,j, u(i,j), v(i,j), vor
-         enddo
-         write( iout, '( bn) ')
-      enddo
-      write(6, *) 'configuration at time and file >>', istep, iout
       end
