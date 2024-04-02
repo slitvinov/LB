@@ -101,63 +101,63 @@ c     # of biased populations
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
       write(6, *) 'u0', u0
-      do j = 0, ny+1
-         do i = 0, nx+1
+      do 10 j = 0, ny+1
+         do 20 i = 0, nx+1
             rho(i,j) = rho0
             u(i,j)   = u0
             v(i,j)   = v0
-         enddo
-      enddo
+ 20      continue
+ 10   continue
       end
 
       subroutine initpop
       implicit double precision(a- h, o-z)
       include 'bgk2.par'
-      do j = 0, ny+1
-         do i = 0, nx+1
-            do ip = 0, npop - 1
+      do 10 j = 0, ny+1
+         do 20 i = 0, nx+1
+            do 30 ip = 0, npop - 1
                f(ip, i, j) = feq(ip, i, j)
                iseed = iseed + 1
-            end do
-         end do
-      end do
+ 30         continue
+ 20      continue
+ 10   continue
       end
 
       subroutine move
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
-      do j = ny, 1, -1
-         do i = 1, nx
+      do 110 j = ny, 1, -1
+         do 120 i = 1, nx
             f(2, i, j) = f(2, i, j - 1)
             f(6, i, j) = f(6, i + 1, j -1)
-         enddo
-      enddo
-      do j = ny,1,-1
-         do i = nx, 1, -1
+ 120     continue
+ 110  continue
+      do 210 j = ny,1,-1
+         do 220 i = nx, 1, -1
             f(1,i,j) = f(1, i - 1, j)
             f(5,i,j) = f(5, i - 1, j - 1)
-         enddo
-      enddo
-      do j = 1, ny
-         do i = nx, 1, -1
+ 220     continue
+ 210  continue
+      do 310 j = 1, ny
+         do 320 i = nx, 1, -1
             f(4, i, j) = f(4, i, j + 1)
             f(8, i, j) = f(8, i - 1, j +1)
-         enddo
-      enddo
-      do j = 1, ny
-         do i = 1, nx
+ 320     continue
+ 310  continue
+      do 410 j = 1, ny
+         do 420 i = 1, nx
             f(3, i, j) = f(3, i + 1, j)
             f(7, i, j) = f(7, i + 1, j + 1)
-         enddo
-      enddo
+ 420     continue
+ 410  continue
       end
 
       subroutine hydrovar
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
 c     hydro variables
-      do j = 1, ny
-         do i = 1, nx
+      do 10 j = 1, ny
+         do 20 i = 1, nx
             rho(i,j)= f(1, i, j) + f(2, i, j) + f(3, i, j)
      $           + f(4, i, j) + f(5, i, j) + f(6, i, j)
      $           + f(7, i, j) + f(8, i, j) + f(0, i, j)
@@ -166,9 +166,8 @@ c     hydro variables
      $           f(6, i, j) - f(7, i, j) + f(8, i, j)) * rhoi
             v(i, j) =(f(5, i, j) + f(2, i, j)+ f(6, i, j)
      $           - f(7, i, j) - f(4, i, j) - f(8, i, j)) * rhoi
-         enddo
-      enddo
-
+ 20      continue
+ 10   continue
       end
 
       subroutine equil
