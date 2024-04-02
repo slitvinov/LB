@@ -53,15 +53,6 @@ c     0= rest particles, 1-4, nearest-neigh(nn), 5-8(nnn)
       read(5 ,*) nobst
       print *, 'Obstacle id', iobst
       print *, 'Length of the obstacle(multple of 2)', nobst
-      print *, 'File for output : 5 chars'
-      read(5, '(A)') fileout
-      open(10, file=fileout      //   '.uy')
-      open(11, file=fileout      //   '.vy')
-      open(12, file=fileout      //   '.rhoy')
-      open(14, file=fileout      //   '.uvx')
-      open(16, file=fileout      //   '.pop')
-      open(50, file=fileout      //   '.probe')
-      open(35, file = 'porous')
 
       print * ,'*****************************************'
       print *, 'Lattice BGK model, 2D with 9 velocities'
@@ -75,7 +66,6 @@ c     0= rest particles, 1-4, nearest-neigh(nn), 5-8(nnn)
       if(iobst.eq.1) then
          print *, 'Linear Obstacle with length :', nobst
       endif
-      write(6, '(A)') 'Output file :', fileout
 c     lattice weights
       w0 = 4.0d0/9.0d0
       w1 = 1.0/9.0d0
@@ -100,7 +90,6 @@ c     # of biased populations
       subroutine inithydro
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
-      write(6, *) 'u0', u0
       do 10 j = 0, ny+1
          do 20 i = 0, nx+1
             rho(i,j) = rho0
@@ -377,6 +366,7 @@ c----------------------------------------------------------
       close(77)
       return
  101  write (*, '(''bgk2: error: fail to write output'')')
+      stop 1
       end
 
       subroutine diag0d(istep)

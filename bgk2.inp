@@ -7,4 +7,3 @@ T                     force yes / no
 0.10                  u forcing
 1                     obstacle 0 = free, 1 = plate
 8                     obstacle height
-OUP18                 label
