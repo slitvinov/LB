@@ -2,15 +2,15 @@ c     D2Q9 lattice, BGK version
 c     0= rest particles, 1-4, nearest-neigh(nn), 5-8(nnn)
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
-      read(5 ,*) nsteps
+      read(5, *) nsteps
       read(5, *) nout
-      read(5 ,*) ndiag
+      read(5, *) ndiag
       read(5, *) omega
-      read(5 ,*) iforce
+      read(5, *) iforce
       read(5, *) rho0, u0, v0
-      read(5 ,*) uf
-      read(5 ,*) iobst
-      read(5 ,*) nobst
+      read(5, *) uf
+      read(5, *) iobst
+      read(5, *) nobst
       w0 = 4/9
       w1 = 1.0/9
       w2 = 1.0/36
@@ -18,23 +18,20 @@ c     0= rest particles, 1-4, nearest-neigh(nn), 5-8(nnn)
       cs22 = 2 * cs2
       cssq = 2 / 9
       visc =(1 / omega - 0.5) * cs2
-      rey = u0*ny / visc
+      rey = u0 * ny / visc
       print *, 'Viscosity and nominal Reynolds:', visc, rey
-      if(visc .lt. 0) stop 'OMEGA OUT of(0, 2) interval!!'
-c     Applied force(based on Stokes problem)
       fpois = 8 * visc * uf / dfloat(ny) / dfloat(ny)
-c     # of biased populations
       fpois = rho0 * fpois / 6.
-      do j = 0, ny+1
-         do i = 0, nx+1
-            rho(i,j) = rho0
-            u(i,j)   = u0
-            v(i,j)   = v0
+      do j = 0, ny + 1
+         do i = 0, nx + 1
+            rho(i, j) = rho0
+            u(i, j)   = u0
+            v(i, j)   = v0
          enddo
       enddo
       call equil
-      do j = 0, ny+1
-         do i = 0, nx+1
+      do j = 0, ny + 1
+         do i = 0, nx + 1
             do ip = 0, npop - 1
                f(ip, i, j) = feq(ip, i, j)
             enddo
@@ -48,7 +45,7 @@ c     # of biased populations
          call colli
          if(iforce) call force
          if(iobst.eq.1) call obst
-         if(mod(istep,ndiag) .eq. 0) call diag(istep)
+         if(mod(istep, ndiag) .eq. 0) call diag(istep)
          if(mod(istep, 100) .eq. 0) call movie(istep)
       enddo
       end
@@ -104,15 +101,15 @@ c     hydro variables
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
 c     equils are written explicitly to avoid multplications by zero
-      do j = 0, ny+1
-         do i = 0, nx+1
-            ul = u(i,j) / cs2
-            vl = v(i,j) / cs2
+      do j = 0, ny + 1
+         do i = 0, nx + 1
+            ul = u(i, j) / cs2
+            vl = v(i, j) / cs2
             uv = ul * vl
-            usq = u(i,j)* u(i,j)
-            vsq = v(i,j)* v(i,j)
-            sumsq =(usq+vsq) / cs22
-            sumsq2 = sumsq *(1 - cs2) / cs2
+            usq = u(i, j) * u(i, j)
+            vsq = v(i, j) * v(i, j)
+            sumsq =(usq + vsq) / cs22
+            sumsq2 = sumsq * (1 - cs2) / cs2
             u2 = usq / cssq
             v2 = vsq / cssq
             feq(0, i, j) = w0 *(1 - sumsq)
@@ -182,9 +179,9 @@ c     NORTH
       enddo
 c     SOUTH
       do i = 1, nx
-         f(4, i, ny+1) = f(4, i, 1)
-         f(7, i, ny+1) = f(7, i, 1)
-         f(8, i, ny+1) = f(8, i, 1)
+         f(4, i, ny + 1) = f(4, i, 1)
+         f(7, i, ny + 1) = f(7, i, 1)
+         f(8, i, ny + 1) = f(8, i, 1)
       enddo
       end
 
@@ -205,15 +202,15 @@ c     EAST outlet
       enddo
 c     NORTH solid
       do i = 1, nx
-         f(4, i, ny+1) = f(2, i, ny)
-         f(8, i, ny+1) = f(6, i +1, ny)
-         f(7, i, ny+1) = f(5, i - 1, ny)
+         f(4, i, ny + 1) = f(2, i, ny)
+         f(8, i, ny + 1) = f(6, i +1, ny)
+         f(7, i, ny + 1) = f(5, i - 1, ny)
       enddo
 c     SOUTH solid
       do i = 1, nx
-         f(2, i ,0) = f(4, i ,1)
-         f(6, i, 0) = f(8, i - 1 ,1)
-         f(5, i, 0) = f(7, i +1 ,1)
+         f(2, i, 0) = f(4, i, 1)
+         f(6, i, 0) = f(8, i - 1, 1)
+         f(5, i, 0) = f(7, i +1, 1)
       enddo
 c     corners bounce-back
       f(8, 0, ny + 1) = f(6, 1, ny)
@@ -229,12 +226,12 @@ c     corners bounce-back
       jbot = ny / 2 - nobst / 2
       jtop = ny / 2 + nobst / 2 + 1
       do j = ny / 2 - nobst / 2, ny / 2 + nobst / 2 + 1
-         f(1 ,i,j) = f(3, i + 1, j)
-         f(5 ,i,j) = f(7, i + 1, j +1)
-         f(8 ,i,j) = f(6, i + 1, j - 1)
-         f(3 ,i,j) = f(1, i - 1, j)
-         f(7 ,i,j) = f(5, i - 1, j)
-         f(6 ,i,j) = f(8, i - 1, j)
+         f(1, i,j) = f(3, i + 1, j)
+         f(5, i,j) = f(7, i + 1, j +1)
+         f(8, i,j) = f(6, i + 1, j - 1)
+         f(3, i,j) = f(1, i - 1, j)
+         f(7, i,j) = f(5, i - 1, j)
+         f(6, i,j) = f(8, i - 1, j)
       enddo
       f(2, i, jtop)= f(4, i, jtop + 1)
       f(6, i, jtop)= f(8, i - 1, jtop + 1)
@@ -249,7 +246,7 @@ c     corners bounce-back
       do k = 0, npop - 1
          do j = 1, ny
             do i = 1, nx
-               densit = densit + f(k ,i,j)
+               densit = densit + f(k, i,j)
             enddo
          enddo
       enddo
