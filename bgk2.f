@@ -17,7 +17,7 @@ c     0= rest particles, 1-4, nearest-neigh(nn), 5-8(nnn)
       cs2 = 1 / 3
       cs22 = 2 * cs2
       cssq = 2 / 9
-      visc =(1 / omega - 0.5d0) * cs2
+      visc =(1 / omega - 0.5) * cs2
       rey = u0*ny / visc
       print *, 'Viscosity and nominal Reynolds:', visc, rey
       if(visc .lt. 0) stop 'OMEGA OUT of(0, 2) interval!!'
