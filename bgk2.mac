@@ -1,0 +1,22 @@
+ul : u / cs2;
+vl : v / cs2;
+uv : ul * vl;
+usq : u * u;
+vsq : v * v;
+sumsq : (usq + vsq) / cs22;
+sumsq2 : sumsq * (1 - cs2) / cs2;
+u2 : usq / cssq;
+v2 : vsq / cssq;
+f[0] : w0 * (1 - sumsq);
+
+f[1] : w1 * (1 - sumsq + u2 + ul);
+f[2] : w1 * (1 - sumsq + v2 + vl);
+f[3] : w1 * (1 - sumsq + u2 - ul);
+f[4] : w1 * (1 - sumsq + v2 - vl);
+
+f[5] : w2 * (1 + sumsq2 + ul + vl + uv);
+f[6] : w2 * (1 + sumsq2 - ul + vl - uv);
+f[7] : w2 * (1 + sumsq2 - ul - vl + uv);
+f[8] : w2 * (1 + sumsq2 + ul - vl - uv);
+
+f[0];
