@@ -11,18 +11,18 @@ c     0= rest particles, 1-4, nearest-neigh(nn), 5-8(nnn)
       read(5 ,*) uf
       read(5 ,*) iobst
       read(5 ,*) nobst
-      w0 = 4.0d0/9.0d0
-      w1 = 1.0/9.0d0
-      w2 = 1.0/36.0d0
-      cs2 = 1.0d0 / 3.0d0
-      cs22 = 2.0d0 * cs2
-      cssq = 2.0d0 / 9.0d0
-      visc =(1.0d0 / omega - 0.5d0) * cs2
+      w0 = 4/9
+      w1 = 1.0/9
+      w2 = 1.0/36
+      cs2 = 1 / 3
+      cs22 = 2 * cs2
+      cssq = 2 / 9
+      visc =(1 / omega - 0.5d0) * cs2
       rey = u0*ny / visc
       print *, 'Viscosity and nominal Reynolds:', visc, rey
       if(visc .lt. 0) stop 'OMEGA OUT of(0, 2) interval!!'
 c     Applied force(based on Stokes problem)
-      fpois = 8.0d0 * visc * uf / dfloat(ny) / dfloat(ny)
+      fpois = 8 * visc * uf / dfloat(ny) / dfloat(ny)
 c     # of biased populations
       fpois = rho0 * fpois / 6.
       do j = 0, ny+1
@@ -112,20 +112,20 @@ c     equils are written explicitly to avoid multplications by zero
             usq = u(i,j)* u(i,j)
             vsq = v(i,j)* v(i,j)
             sumsq =(usq+vsq) / cs22
-            sumsq2 = sumsq *(1.0d0 - cs2) / cs2
+            sumsq2 = sumsq *(1 - cs2) / cs2
             u2 = usq / cssq
             v2 = vsq / cssq
-            feq(0, i, j) = w0 *(1.0d0 - sumsq)
+            feq(0, i, j) = w0 *(1 - sumsq)
 
-            feq(1, i, j) = w1 *(1.0d0 - sumsq + u2 + ul)
-            feq(2, i, j) = w1 *(1.0d0 - sumsq + v2 + vl)
-            feq(3, i, j) = w1 *(1.0d0 - sumsq + u2 - ul)
-            feq(4, i, j) = w1 *(1.0d0 - sumsq + v2 - vl)
+            feq(1, i, j) = w1 *(1 - sumsq + u2 + ul)
+            feq(2, i, j) = w1 *(1 - sumsq + v2 + vl)
+            feq(3, i, j) = w1 *(1 - sumsq + u2 - ul)
+            feq(4, i, j) = w1 *(1 - sumsq + v2 - vl)
 
-            feq(5, i, j) = w2 *(1.0d0 + sumsq2 + ul + vl + uv)
-            feq(6, i, j) = w2 *(1.0d0 + sumsq2 - ul + vl - uv)
-            feq(7, i, j) = w2 *(1.0d0 + sumsq2 - ul - vl + uv)
-            feq(8, i, j) = w2 *(1.0d0 + sumsq2 + ul - vl - uv)
+            feq(5, i, j) = w2 *(1 + sumsq2 + ul + vl + uv)
+            feq(6, i, j) = w2 *(1 + sumsq2 - ul + vl - uv)
+            feq(7, i, j) = w2 *(1 + sumsq2 - ul - vl + uv)
+            feq(8, i, j) = w2 *(1 + sumsq2 + ul - vl - uv)
          enddo
       enddo
       end
@@ -136,7 +136,7 @@ c     equils are written explicitly to avoid multplications by zero
       do k = 0, npop - 1
          do j = 1, ny
             do i = 1, nx
-               f(k, i, j) = f(k, i, j) *(1.0d0 - omega) +
+               f(k, i, j) = f(k, i, j) *(1 - omega) +
      $              omega* feq(k, i, j)
             enddo
          enddo
@@ -245,7 +245,7 @@ c     corners bounce-back
       subroutine diag(istep)
       implicit double precision(a-h, o-z)
       include 'bgk2.par'
-      densit= 0.0d0
+      densit= 0
       do k = 0, npop - 1
          do j = 1, ny
             do i = 1, nx
@@ -254,8 +254,8 @@ c     corners bounce-back
          enddo
       enddo
       densit= densit/ dfloat( nx*ny) / dfloat( npop)
-      umoy = 0.0d0
-      vmoy = 0.0d0
+      umoy = 0
+      vmoy = 0
 
       do j = 1, ny
          do i = 1, nx
