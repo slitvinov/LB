@@ -108,21 +108,21 @@ c     equils are written explicitly to avoid multplications by zero
             uv = ul * vl
             usq = u(i, j) * u(i, j)
             vsq = v(i, j) * v(i, j)
-            sumsq =(usq + vsq) / cs22
+            sumsq = (usq + vsq) / cs22
             sumsq2 = sumsq * (1 - cs2) / cs2
             u2 = usq / cssq
             v2 = vsq / cssq
-            feq(0, i, j) = w0 *(1 - sumsq)
+            feq(0, i, j) = w0 * (1 - sumsq)
 
-            feq(1, i, j) = w1 *(1 - sumsq + u2 + ul)
-            feq(2, i, j) = w1 *(1 - sumsq + v2 + vl)
-            feq(3, i, j) = w1 *(1 - sumsq + u2 - ul)
-            feq(4, i, j) = w1 *(1 - sumsq + v2 - vl)
+            feq(1, i, j) = w1 * (1 - sumsq + u2 + ul)
+            feq(2, i, j) = w1 * (1 - sumsq + v2 + vl)
+            feq(3, i, j) = w1 * (1 - sumsq + u2 - ul)
+            feq(4, i, j) = w1 * (1 - sumsq + v2 - vl)
 
-            feq(5, i, j) = w2 *(1 + sumsq2 + ul + vl + uv)
-            feq(6, i, j) = w2 *(1 + sumsq2 - ul + vl - uv)
-            feq(7, i, j) = w2 *(1 + sumsq2 - ul - vl + uv)
-            feq(8, i, j) = w2 *(1 + sumsq2 + ul - vl - uv)
+            feq(5, i, j) = w2 * (1 + sumsq2 + ul + vl + uv)
+            feq(6, i, j) = w2 * (1 + sumsq2 - ul + vl - uv)
+            feq(7, i, j) = w2 * (1 + sumsq2 - ul - vl + uv)
+            feq(8, i, j) = w2 * (1 + sumsq2 + ul - vl - uv)
          enddo
       enddo
       end
@@ -226,12 +226,12 @@ c     corners bounce-back
       jbot = ny / 2 - nobst / 2
       jtop = ny / 2 + nobst / 2 + 1
       do j = ny / 2 - nobst / 2, ny / 2 + nobst / 2 + 1
-         f(1, i,j) = f(3, i + 1, j)
-         f(5, i,j) = f(7, i + 1, j +1)
-         f(8, i,j) = f(6, i + 1, j - 1)
-         f(3, i,j) = f(1, i - 1, j)
-         f(7, i,j) = f(5, i - 1, j)
-         f(6, i,j) = f(8, i - 1, j)
+         f(1, i, j) = f(3, i + 1, j)
+         f(5, i, j) = f(7, i + 1, j + 1)
+         f(8, i, j) = f(6, i + 1, j - 1)
+         f(3, i, j) = f(1, i - 1, j)
+         f(7, i, j) = f(5, i - 1, j)
+         f(6, i, j) = f(8, i - 1, j)
       enddo
       f(2, i, jtop)= f(4, i, jtop + 1)
       f(6, i, jtop)= f(8, i - 1, jtop + 1)
@@ -246,7 +246,7 @@ c     corners bounce-back
       do k = 0, npop - 1
          do j = 1, ny
             do i = 1, nx
-               densit = densit + f(k, i,j)
+               densit = densit + f(k, i, j)
             enddo
          enddo
       enddo
@@ -256,12 +256,12 @@ c     corners bounce-back
 
       do j = 1, ny
          do i = 1, nx
-            umoy = umoy + u(i,j)
-            vmoy = vmoy + v(i,j)
+            umoy = umoy + u(i, j)
+            vmoy = vmoy + v(i, j)
          enddo
       enddo
-      umoy = umoy / dfloat( nx*ny)
-      vmoy = vmoy / dfloat( nx*ny)
+      umoy = umoy / dfloat(nx * ny)
+      vmoy = vmoy / dfloat(nx * ny)
       print *, 'diag: istep density umoy and vmoy ',
      $     istep, densit, umoy, vmoy
       end
