@@ -1,88 +1,72 @@
+import math
 import torch as np
 if np.cuda.is_available():
     np.set_default_device("cuda")
 
-nx = 1600
-ny = 400
+n = 1000
 nsteps = 10000
 nplot = 100
-x0 = nx // 5
-y0 = ny // 2
-r0 = ny // 20
-u0 = 0.1
-Re = 100
-nu = u0 * 2. * r0 / Re
-omega = 1. / (3 * nu + 1. / 2.)
-t = 4 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 9, 1 / 36, 1 / 36, 1 / 36, 1 / 36
+cs2 = 1 / 3
+omega = 3 / 2
+t = [4 / 9] + [1 / 9] * 4 + [1 / 36] * 4
 cx = 0, 1, 0, -1, 0, 1, -1, -1, 1
 cy = 0, 0, 1, 0, -1, 1, 1, -1, -1
-x, y = np.meshgrid(np.arange(nx + 2), np.arange(ny + 2), indexing="ij")
-obst = (x - x0)**2 + (y - y0)**2 <= r0**2
-u = np.zeros((nx + 2, ny + 2), dtype=np.float64)
-v = np.zeros((nx + 2, ny + 2), dtype=np.float64)
-rho0 = 1
-rho = np.full((nx + 2, ny + 2), rho0, dtype=np.float64)
-f = [np.empty((nx + 2, ny + 2), dtype=np.float64) for i in range(9)]
-feq = np.empty((nx + 2, ny + 2), dtype=np.float64)
-c = np.empty((nx + 2, ny + 2), dtype=np.float64)
-
+x = np.asarray([ 2 * math.pi * (i - 1) / n for i in range(n + 2) ], dtype=np.float64)
+u = np.empty((n + 2, n + 2), dtype=np.float64)
+v = np.empty((n + 2, n + 2), dtype=np.float64)
+u0 = 0.1
+visc = (1 / omega - 0.5) * cs2
+print(visc, re)
+np.outer(u0 * np.sin(x), np.cos(x), out=u)
+np.outer(-u0 * np.cos(x), np.sin(x), out=v)
+rho = np.ones((n + 2, n + 2), dtype=np.float64)
+f = [np.empty((n + 2, n + 2), dtype=np.float64) for i in range(9)]
+feq = np.empty((n + 2, n + 2), dtype=np.float64)
+c = np.empty((n + 2, n + 2), dtype=np.float64)
 for i in range(9):
-    c[:] = 3 * (cx[i] * u + cy[i] * v)
-    f[i][:] = rho0 * t[i] * (1 + c + 1 / 2 * (c * c) - 3 / 2 * (u**2 + v**2))
+    c[:] = (cx[i] * u + cy[i] * v) / cs2
+    f[i][:] = t[i] * (1 + c + 1 / 2 * (c * c) - 3 / 2 * (u**2 + v**2))
 
 for istep in range(nsteps):
-    f[1][0, 1:ny + 1] = f[1][nx, 1:ny + 1]
-    f[5][0, 1:ny + 1] = f[5][nx, 1:ny + 1]
-    f[8][0, 1:ny + 1] = f[8][nx, 1:ny + 1]
+    f[1][0, 1:n + 1] = f[1][n, 1:n + 1]
+    f[5][0, 1:n + 1] = f[5][n, 1:n + 1]
+    f[8][0, 1:n + 1] = f[8][n, 1:n + 1]
 
-    f[3][nx + 1, 1:ny + 1] = f[3][1, 1:ny + 1]
-    f[6][nx + 1, 1:ny + 1] = f[6][1, 1:ny + 1]
-    f[7][nx + 1, 1:ny + 1] = f[7][1, 1:ny + 1]
+    f[3][n + 1, 1:n + 1] = f[3][1, 1:n + 1]
+    f[6][n + 1, 1:n + 1] = f[6][1, 1:n + 1]
+    f[7][n + 1, 1:n + 1] = f[7][1, 1:n + 1]
 
-    f[2][1:nx + 1, 0] = f[2][1:nx + 1, ny]
-    f[5][1:nx + 1, 0] = f[5][1:nx + 1, ny]
-    f[6][1:nx + 1, 0] = f[6][1:nx + 1, ny]
+    f[2][1:n + 1, 0] = f[2][1:n + 1, n]
+    f[5][1:n + 1, 0] = f[5][1:n + 1, n]
+    f[6][1:n + 1, 0] = f[6][1:n + 1, n]
 
-    f[4][1:nx + 1, ny + 1] = f[4][1:nx + 1, 1]
-    f[7][1:nx + 1, ny + 1] = f[7][1:nx + 1, 1]
-    f[8][1:nx + 1, ny + 1] = f[8][1:nx + 1, 1]
+    f[4][1:n + 1, n + 1] = f[4][1:n + 1, 1]
+    f[7][1:n + 1, n + 1] = f[7][1:n + 1, 1]
+    f[8][1:n + 1, n + 1] = f[8][1:n + 1, 1]
 
-    f[5][0, 0] = f[5][nx, ny]
-    f[7][nx + 1, ny + 1] = f[7][1, 1]
+    f[5][0, 0] = f[5][n, n]
+    f[7][n + 1, n + 1] = f[7][1, 1]
 
-    f[5][0, 0] = f[5][nx, ny]
-    f[7][nx + 1, ny + 1] = f[7][1, 1]
+    f[5][0, 0] = f[5][n, n]
+    f[7][n + 1, n + 1] = f[7][1, 1]
 
-    f[8][nx + 1, 0] = f[8][1, ny]
-    f[6][0, ny + 1] = f[6][nx, 1]
+    f[8][n + 1, 0] = f[8][1, n]
+    f[6][0, n + 1] = f[6][n, 1]
 
     rho[:] = f[0] + f[1] + f[2] + f[3] + f[4] + f[5] + f[6] + f[7] + f[8]
     u[:] = (f[1] - f[3] + f[5] - f[6] - f[7] + f[8]) / rho
     v[:] = (f[5] + f[2] + f[6] - f[7] - f[4] - f[8]) / rho
 
-    force = -1e-4
-    f[1] += force
-    f[5] += force
-    f[8] += force
-
-    f[3] -= force
-    f[6] -= force
-    f[7] -= force
-
     # collision and bounce-back boundary condition
     for i in range(9):
-        c[:] = 3 * (cx[i] * u + cy[i] * v)
+        c[:] = (cx[i] * u + cy[i] * v) / cs2
         feq[:] = rho * t[i] * (1 + c + 1 / 2 * (c * c) - 3 / 2 * (u**2 + v**2))
         f[i][:] = f[i] * (1 - omega) + omega * feq
-    f[1][obst], f[3][obst] = f[3][obst], f[1][obst]
-    f[2][obst], f[4][obst] = f[4][obst], f[2][obst]
-    f[5][obst], f[7][obst] = f[7][obst], f[5][obst]
-    f[6][obst], f[8][obst] = f[8][obst], f[6][obst]
 
     # streaming step
     for i in range(9):
-        f[i][:][1:nx + 1, 1:ny + 1] = np.roll(f[i], (cx[i], cy[i]),
-                                              (0, 1))[1:nx + 1, 1:ny + 1]
+        f[i][:][1:n + 1, 1:n + 1] = np.roll(f[i], (cx[i], cy[i]),
+                                              (0, 1))[1:n + 1, 1:n + 1]
 
     if istep % nplot == 0:
         path = "cyl.%09d.raw" % istep
@@ -97,10 +81,9 @@ for istep in range(nsteps):
                    np.std(field)))
         with open(path, "wb") as fid:
             for field in [u, v, rho, vort]:
-                field[obst] = np.nan
                 if hasattr(field, "numpy"):
                     field = field.cpu().detach().numpy()
-                fid.write(field[1:nx + 1, 1:ny + 1].tobytes("F"))
+                fid.write(field[1:n + 1, 1:n + 1].tobytes("F"))
 """
 
 625
