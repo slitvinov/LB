@@ -2,10 +2,10 @@ import torch as np
 if np.cuda.is_available():
     np.set_default_device("cuda")
 
-nx = 800
-ny = 200
+nx = 1600
+ny = 400
 nsteps = 10000
-nplot = 1000
+nplot = 100
 x0 = nx // 5
 y0 = ny // 2
 r0 = ny // 20
@@ -47,25 +47,33 @@ for istep in range(nsteps):
     f[7][1:nx + 1, ny + 1] = f[7][1:nx + 1, 1]
     f[8][1:nx + 1, ny + 1] = f[8][1:nx + 1, 1]
 
+    f[5][0, 0] = f[5][nx, ny]
+    f[7][nx + 1, ny + 1] = f[7][1, 1]
+
+    f[5][0, 0] = f[5][nx, ny]
+    f[7][nx + 1, ny + 1] = f[7][1, 1]
+
+    f[8][nx + 1, 0] = f[8][1, ny]
+    f[6][0, ny + 1] = f[6][nx, 1]
 
     rho[:] = f[0] + f[1] + f[2] + f[3] + f[4] + f[5] + f[6] + f[7] + f[8]
     u[:] = (f[1] - f[3] + f[5] - f[6] - f[7] + f[8]) / rho
     v[:] = (f[5] + f[2] + f[6] - f[7] - f[4] - f[8]) / rho
 
-    force = 1e-5
-    f[1][1:nx+1,1:ny+1] += force
-    f[5][1:nx+1,1:ny+1] += force
-    f[8][1:nx+1,1:ny+1] += force
+    force = -1e-4
+    f[1] += force
+    f[5] += force
+    f[8] += force
 
-    f[3][1:nx+1,1:ny+1] -= force
-    f[6][1:nx+1,1:ny+1] -= force
-    f[7][1:nx+1,1:ny+1] -= force
+    f[3] -= force
+    f[6] -= force
+    f[7] -= force
 
     # collision and bounce-back boundary condition
     for i in range(9):
         c[:] = 3 * (cx[i] * u + cy[i] * v)
         feq[:] = rho * t[i] * (1 + c + 1 / 2 * (c * c) - 3 / 2 * (u**2 + v**2))
-        f[i][~obst] = f[i][~obst] * (1 - omega) + omega * feq[~obst]
+        f[i][:] = f[i] * (1 - omega) + omega * feq
     f[1][obst], f[3][obst] = f[3][obst], f[1][obst]
     f[2][obst], f[4][obst] = f[4][obst], f[2][obst]
     f[5][obst], f[7][obst] = f[7][obst], f[5][obst]
@@ -73,7 +81,8 @@ for istep in range(nsteps):
 
     # streaming step
     for i in range(9):
-        f[i][:] = np.roll(f[i], (cx[i], cy[i]), (0, 1))
+        f[i][:][1:nx + 1, 1:ny + 1] = np.roll(f[i], (cx[i], cy[i]),
+                                              (0, 1))[1:nx + 1, 1:ny + 1]
 
     if istep % nplot == 0:
         path = "cyl.%09d.raw" % istep
@@ -91,12 +100,16 @@ for istep in range(nsteps):
                 field[obst] = np.nan
                 if hasattr(field, "numpy"):
                     field = field.cpu().detach().numpy()
-                fid.write(field[1:nx+1, 1:ny+1].tobytes("F"))
+                fid.write(field[1:nx + 1, 1:ny + 1].tobytes("F"))
 """
 
 625
 301
 748
 
-"""
+oooo
+oxxo
+oxxo
+oooo
 
+"""
